@@ -2006,8 +2006,8 @@
     //  ⚠️  STEP: Replace the URL below with your deployed
     //      Google Apps Script Web App URL.
     // ══════════════════════════════════════════════════════════════
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyNQqGtnfjf8v7LwGSVr4UtOCJSK_FrYfZM_SdKZ51dLANiPYIzngo7oqEt9RO1ZZ_i/exec";
-    const CONFIG_URL = "./Control/config.json";
+    // ⚠️ PASTE YOUR APP SCRIPT URL HERE AFTER DEPLOYING
+    const SCRIPT_URL = "YOUR_APP_SCRIPT_URL_HERE";
     const W_MIN = 800, W_MAX = 2500, W_STEP = 100;
 
     let siteConfig = null;
@@ -2029,13 +2029,19 @@
       if (nav) nav.classList.toggle('scrolled', window.scrollY > 50);
     });
 
-    // ── LOAD CONFIG ───────────────────────────────────────────────
+    // ── LOAD CONFIG ─── reads live from Google Sheet via App Script ──
     async function loadConfig() {
       try {
-        const res = await fetch(CONFIG_URL + '?t=' + Date.now());
+        const res = await fetch(SCRIPT_URL + '?action=getConfig&t=' + Date.now());
         siteConfig = await res.json();
       } catch (e) {
-        console.warn('Could not load config.json');
+        // Fallback: try local config.json (for offline dev / backup)
+        try {
+          const res2 = await fetch('./Control/config.json?t=' + Date.now());
+          siteConfig = await res2.json();
+        } catch (e2) {
+          console.warn('Could not load config from App Script or config.json');
+        }
       }
       applyConfig();
       renderPriceList();
@@ -2068,7 +2074,7 @@
     function applyConfig() {
       if (!siteConfig || !siteConfig.meta) return;
       const m = siteConfig.meta;
-      if (m.deliveryHours) document.getElementById('deliveryHoursEn').textContent = m.deliveryHours;
+      if (m.deliveryHours)   document.getElementById('deliveryHoursEn').textContent = m.deliveryHours;
       if (m.deliveryHoursAr) document.getElementById('deliveryHoursAr').textContent = m.deliveryHoursAr;
     }
 
@@ -2298,7 +2304,7 @@
       });
 
       const img = new Image();
-      img.src = SCRIPT_URL + '?' + params.toString();
+      img.src = SCRIPT_URL + '?action=recordOrder&' + params.toString();
 
       setTimeout(() => {
         btn.disabled = false;
