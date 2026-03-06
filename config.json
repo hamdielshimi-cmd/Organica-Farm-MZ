@@ -1,0 +1,356 @@
+{
+  "meta": {
+    "siteName": "Orgánica",
+    "siteNameAr": "أورجانيكا",
+    "heroTagline": "The Gold Standard of Organic Poultry",
+    "heroTaglineAr": "المعيار الذهبي للطيور الأورجانيك",
+    "whatsapp": "201067776664",
+    "deliveryFeeEGP": 75,
+    "deliveryHours": "9 AM – 9 PM (All Week days)",
+    "deliveryHoursAr": "٩ صباحاً – ٩ مساءً (طوال أيام الأسبوع)",
+    "ramadanSectionVisible": true,
+    "appScriptURL": "https://script.google.com/macros/s/AKfycbyNQqGtnfjf8v7LwGSVr4UtOCJSK_FrYfZM_SdKZ51dLANiPYIzngo7oqEt9RO1ZZ_i/exec"
+  },
+  "products": [
+    {
+      "id": "baladi_chicken",
+      "section": "whole_poultry",
+      "nameEn": "Baladi Chicken",
+      "nameAr": "دجاج بلدي",
+      "pricingType": "variable_weight",
+      "pricePerKg": 190,
+      "defaultWeightG": 1200,
+      "minWeightG": 800,
+      "maxWeightG": 2500,
+      "active": true
+    },
+    {
+      "id": "white_chicken",
+      "section": "whole_poultry",
+      "nameEn": "White Chicken",
+      "nameAr": "دجاج أبيض",
+      "pricingType": "variable_weight",
+      "pricePerKg": 140,
+      "defaultWeightG": 1200,
+      "minWeightG": 800,
+      "maxWeightG": 2500,
+      "active": true
+    },
+    {
+      "id": "pigeons",
+      "section": "whole_poultry",
+      "nameEn": "Pigeons",
+      "nameAr": "حمام",
+      "pricingType": "fixed",
+      "fixedPrice": 275,
+      "fixedUnit": "pair",
+      "fixedUnitAr": "زوج",
+      "active": true
+    },
+    {
+      "id": "duck",
+      "section": "whole_poultry",
+      "nameEn": "Duck",
+      "nameAr": "بط",
+      "pricingType": "variable_weight",
+      "pricePerKg": 210,
+      "defaultWeightG": 1500,
+      "minWeightG": 800,
+      "maxWeightG": 2500,
+      "active": true
+    },
+    {
+      "id": "drumsticks",
+      "section": "cuts",
+      "nameEn": "Drumsticks (bone-in)",
+      "nameAr": "دبوس بالعظم",
+      "pricingType": "fixed",
+      "fixedPrice": 180,
+      "fixedUnit": "kg",
+      "fixedUnitAr": "كجم",
+      "active": true
+    },
+    {
+      "id": "thighs_bone",
+      "section": "cuts",
+      "nameEn": "Thighs (bone-in)",
+      "nameAr": "أوراك بالعظم",
+      "pricingType": "fixed",
+      "fixedPrice": 160,
+      "fixedUnit": "kg",
+      "fixedUnitAr": "كجم",
+      "active": true
+    },
+    {
+      "id": "thighs_boneless",
+      "section": "cuts",
+      "nameEn": "Thighs (boneless)",
+      "nameAr": "أوراك مخلية",
+      "pricingType": "fixed",
+      "fixedPrice": 260,
+      "fixedUnit": "kg",
+      "fixedUnitAr": "كجم",
+      "active": true
+    },
+    {
+      "id": "wings",
+      "section": "cuts",
+      "nameEn": "Wings",
+      "nameAr": "أجنحة",
+      "pricingType": "fixed",
+      "fixedPrice": 80,
+      "fixedUnit": "kg",
+      "fixedUnitAr": "كجم",
+      "active": true
+    },
+    {
+      "id": "pane",
+      "section": "processed",
+      "nameEn": "Pané Fillets (Thin/Thick Cut) Upon Request",
+      "nameAr": "بانية (رفيع / سميك) حسب الطلب",
+      "pricingType": "fixed",
+      "fixedPrice": 275,
+      "fixedUnit": "kg",
+      "fixedUnitAr": "كجم",
+      "active": true
+    },
+    {
+      "id": "shish_tawook",
+      "section": "processed",
+      "nameEn": "Shish Tawook (Thighs/Breasts) Upon Request",
+      "nameAr": "شيش طاووق (أوراك - صدور) حسب الطلب",
+      "pricingType": "fixed",
+      "fixedPrice": 275,
+      "fixedUnit": "kg",
+      "fixedUnitAr": "كجم",
+      "active": true
+    },
+    {
+      "id": "breasts",
+      "section": "processed",
+      "nameEn": "Chicken Breasts",
+      "nameAr": "صدور",
+      "pricingType": "fixed",
+      "fixedPrice": 275,
+      "fixedUnit": "kg",
+      "fixedUnitAr": "كجم",
+      "active": true
+    },
+    {
+      "id": "minced",
+      "section": "processed",
+      "nameEn": "Minced",
+      "nameAr": "مفروم",
+      "pricingType": "fixed",
+      "fixedPrice": 275,
+      "fixedUnit": "kg",
+      "fixedUnitAr": "كجم",
+      "active": true
+    },
+    {
+      "id": "shawarma",
+      "section": "processed",
+      "nameEn": "Shawarma",
+      "nameAr": "شاورما",
+      "pricingType": "fixed",
+      "fixedPrice": 275,
+      "fixedUnit": "kg",
+      "fixedUnitAr": "كجم",
+      "active": true
+    },
+    {
+      "id": "liver",
+      "section": "offal",
+      "nameEn": "Pure Liver",
+      "nameAr": "كبدة صافي",
+      "pricingType": "fixed",
+      "fixedPrice": 190,
+      "fixedUnit": "kg",
+      "fixedUnitAr": "كجم",
+      "active": true
+    },
+    {
+      "id": "prod_1772659831285",
+      "active": true,
+      "nameEn": "Rabbit",
+      "nameAr": "أرنب",
+      "section": "whole_poultry",
+      "pricingType": "variable_weight",
+      "pricePerKg": 230,
+      "defaultWeightG": 1200,
+      "minWeightG": 800,
+      "maxWeightG": 2500
+    },
+    {
+      "id": "prod_1772659908100",
+      "active": true,
+      "nameEn": "Temsa7",
+      "nameAr": "تمساح",
+      "section": "whole_poultry",
+      "pricingType": "variable_weight",
+      "pricePerKg": 330,
+      "defaultWeightG": 1200,
+      "minWeightG": 800,
+      "maxWeightG": 2500
+    }
+  ],
+  "sections": [
+    {
+      "id": "whole_poultry",
+      "labelEn": "🐔 Whole Poultry",
+      "labelAr": "🐔 دواجن كاملة",
+      "order": 1
+    },
+    {
+      "id": "cuts",
+      "labelEn": "🍗 Cuts",
+      "labelAr": "🍗 قطعيات",
+      "order": 2
+    },
+    {
+      "id": "processed",
+      "labelEn": "⚡ Processed",
+      "labelAr": "⚡ مصنعات",
+      "order": 3
+    },
+    {
+      "id": "offal",
+      "labelEn": "🫀 Offal",
+      "labelAr": "🫀 كبدة",
+      "order": 4
+    }
+  ],
+  "ramadanBundles": [
+    {
+      "id": "small",
+      "nameEn": "Small Family Bundle (4 Pers.)",
+      "nameAr": "باقة العيلة الصغيرة (٤ أفراد)",
+      "badgeEn": "Small Family",
+      "badgeAr": "العيلة الصغيرة",
+      "badgeEmoji": "🌿",
+      "personsEn": "👨‍👩‍👧‍👦 Ideal for a cozy 4-person Iftar",
+      "personsAr": "👨‍👩‍👧‍👦 مثالي لإفطار عيلة ٤ أفراد",
+      "contentsEn": [
+        "1 Baladi Chicken (whole) — 190 EGP @ 1.5 kg",
+        "1 kg Chicken Thighs (bone-in) — 160 EGP"
+      ],
+      "contentsAr": [
+        "١ دجاجة بلدي كاملة — ٢٨٥ ج @ ١.٥ كجم",
+        "١ كجم أوراك بالعظم — ١٦٠ ج"
+      ],
+      "originalPriceEn": "445",
+      "originalPriceAr": "٤٤٥",
+      "bundlePrice": 395,
+      "saveEn": "Save 50 EGP · ~11%",
+      "saveAr": "وفّر ٥٠ ج · ١١٪",
+      "descEn": "1 Baladi Chicken (~1.5kg) + 1kg Thighs (bone-in)",
+      "descAr": "دجاجة بلدي (~١.٥ كيلو) + كيلو أوراك بالعظم",
+      "active": true
+    },
+    {
+      "id": "gathering",
+      "nameEn": "The Gathering Bundle (6 Pers.)",
+      "nameAr": "باقة التجمّع (٦ أفراد)",
+      "badgeEn": "The Gathering",
+      "badgeAr": "التجمّع",
+      "badgeEmoji": "✨",
+      "personsEn": "👨‍👩‍👧‍👦👶 The classic Ramadan spread for 6 persons",
+      "personsAr": "👨‍👩‍👧‍👦👶 مائدة رمضان الكلاسيكية لـ ٦ أفراد",
+      "contentsEn": [
+        "1 Whole Duck (~3 kg @ 210/kg) — 630 EGP",
+        "1 kg All Pané Cuts — 275 EGP",
+        "1 Baladi Chicken (whole) — 190 EGP @ 1.5 kg"
+      ],
+      "contentsAr": [
+        "١ بطة كاملة (~٣ كجم) — ٦٣٠ ج",
+        "١ كجم قطعيات بانيه — ٢٧٥ ج",
+        "١ دجاجة بلدي كاملة — ٢٨٥ ج @ ١.٥ كجم"
+      ],
+      "originalPriceEn": "1,190",
+      "originalPriceAr": "١٬١٩٠",
+      "bundlePrice": 1090,
+      "saveEn": "Save 100 EGP · ~8%",
+      "saveAr": "وفّر ١٠٠ ج · ٨٪",
+      "descEn": "1 Whole Duck (~3kg) + 1kg Pané Cuts + 1 Baladi Chicken",
+      "descAr": "بطة كاملة (~٣ كيلو) + كيلو قطعيات بانيه + دجاجة بلدي",
+      "active": true
+    },
+    {
+      "id": "feast",
+      "nameEn": "Big Feast Bundle (8 Pers.)",
+      "nameAr": "باقة الوليمة الكبيرة (٨ أفراد)",
+      "badgeEn": "Big Feast",
+      "badgeAr": "الوليمة الكبيرة",
+      "badgeEmoji": "👑",
+      "personsEn": "🎉 The ultimate First-Day-of-Ramadan luxury — 8 persons",
+      "personsAr": "🎉 الرفاهية المطلقة ليوم رمضان الأول — ٨ أفراد",
+      "contentsEn": [
+        "1 Whole Duck (~3 kg @ 210/kg) — 630 EGP",
+        "2 Pairs of Pigeons (2 × 275) — 550 EGP",
+        "1 Baladi Chicken (whole) — 190 EGP @ 1.5 kg",
+        "1 kg All Pané Cuts — 275 EGP"
+      ],
+      "contentsAr": [
+        "١ بطة كاملة (~٣ كجم) — ٦٣٠ ج",
+        "٢ جوز حمام (٢ × ٢٧٥) — ٥٥٠ ج",
+        "١ دجاجة بلدي كاملة — ٢٨٥ ج @ ١.٥ كجم",
+        "١ كجم قطعيات بانيه — ٢٧٥ ج"
+      ],
+      "originalPriceEn": "1,740",
+      "originalPriceAr": "١٬٧٤٠",
+      "bundlePrice": 1565,
+      "saveEn": "Save 175 EGP · ~10%",
+      "saveAr": "وفّر ١٧٥ ج · ١٠٪",
+      "descEn": "1 Whole Duck (~3kg) + 2 Pairs Pigeons + 1 Baladi Chicken + 1kg Pané Cuts",
+      "descAr": "بطة كاملة (~٣ كيلو) + جوزين حمام + دجاجة بلدي + كيلو قطعيات بانيه",
+      "active": true
+    }
+  ],
+  "faqItems": [
+    {
+      "id": "faq_1",
+      "questionEn": "What makes Orgánica's poultry \"organic\"?",
+      "questionAr": "إيه اللي بيخلي دواجن Orgánica \"عضوية\"؟",
+      "answerEn": "At Orgánica, our poultry is raised according to three essential principles: Natural Diet — our birds are fed a carefully prepared vegetable-based blend called \"Al-'Aleqa\", made from beets, carrots, and fresh vegetables, with no added hormones or harmful chemicals. Healthy Environment — birds move freely in open spaces with natural sunlight and proper heating to support strong immunity. Responsible Care — every stage of feeding and raising is personally supervised to ensure consistent quality and animal well-being.",
+      "answerAr": "في Orgánica، بنربي دواجننا على ثلاث أسس رئيسية: تغذية طبيعية — الطيور بتتغذى على خلطة نباتية مُحضّرة بعناية اسمها \"العليقة\"، مكوّنة من البنجر والجزر وخضروات طازجة، بدون أي هرمونات مضافة أو مواد كيميائية ضارة. بيئة صحية — الطيور بتتحرك بحرية في مساحات مفتوحة مع تعرّض طبيعي للشمس وتدفئة مناسبة لدعم المناعة. رعاية مسؤولة — كل مرحلة من مراحل التربية والتغذية بيتم الإشراف عليها لضمان الجودة وصحة الطيور.",
+      "active": true,
+      "order": 1
+    },
+    {
+      "id": "faq_2",
+      "questionEn": "What products does Orgánica offer?",
+      "questionAr": "إيه المنتجات اللي Orgánica بتقدمها؟",
+      "answerEn": "We offer a full range of premium organic poultry: Whole Poultry (Baladi Chicken, White Chicken, Pigeons, Duck) — Cuts (Drumsticks, Thighs bone-in & boneless, Wings) — Processed (Pané cuts in frying, cubes, minced, shawarma, or whole) — Offal (Pure Liver). Grilling marinades are also available on request.",
+      "answerAr": "بنقدم تشكيلة كاملة من الدواجن العضوية الفاخرة: دواجن كاملة (دجاج بلدي، دجاج أبيض، حمام، بط) — قطعيات (دبوس، أوراك بالعظم والمخلية، أجنحة) — مصنعات (قطعيات بانيه بجميع أشكالها) — كبدة صافي. تتبيلات الشوي متوفرة عند الطلب.",
+      "active": true,
+      "order": 2
+    },
+    {
+      "id": "faq_3",
+      "questionEn": "How do I place an order?",
+      "questionAr": "إزاي أطلب؟",
+      "answerEn": "All orders are placed exclusively through the order form on this page. Simply select your items and quantities, fill in your name, phone number, and delivery address, then click \"Submit Order.\" You'll receive a confirmation from us shortly. For any questions or special requests, you can reach us on WhatsApp.",
+      "answerAr": "جميع الطلبات تتم حصرياً من خلال نموذج الطلب في هذه الصفحة. اختار منتجاتك وكمياتها، ادخل اسمك ورقم تليفونك وعنوانك، واضغط \"إرسال الطلب.\" هنتواصل معاك قريباً للتأكيد. لأي أسئلة أو طلبات خاصة، تقدر تتواصل معنا على واتساب.",
+      "active": true,
+      "order": 3
+    },
+    {
+      "id": "faq_4",
+      "questionEn": "How does Orgánica ensure the well-being of its birds?",
+      "questionAr": "إزاي Orgánica بتضمن صحة الطيور وراحتها؟",
+      "answerEn": "We prioritize animal welfare through a \"Bio-Vitality Environment\" — birds enjoy free movement in open spaces, plenty of natural sunlight, and are never confined to cages all day. Infrared heating supports their natural immunity without chemicals. This approach not only ensures healthier, happier birds but also results in lower fat content and better-tasting meat.",
+      "answerAr": "بنولي اهتمام كبير لرفاهية الحيوانات من خلال \"بيئة حيوية\" — الطيور بتتحرك بحرية في أماكن مفتوحة، بتاخد قدر كافي من أشعة الشمس الطبيعية، ومش محبوسة في أقفاص طول اليوم. التدفئة بالأشعة تحت الحمراء بتدعم مناعتها بشكل طبيعي من غير كيماويات.",
+      "active": true,
+      "order": 4
+    },
+    {
+      "id": "faq_5",
+      "questionEn": "What is \"Al-'Aleqa\"?",
+      "questionAr": "إيه هي \"العليقة\"؟",
+      "answerEn": "A custom feed mix the farm owner prepares personally — fresh vegetables, beets, carrots, and corn. Carefully selected for nutritious, high-quality daily meals for our birds.",
+      "answerAr": "خلطة أعلاف خاصة يُعدّها صاحب المزرعة بنفسه — خضروات طازجة، بنجر، جزر، وذرة. مختارة بعناية لوجبات غذائية مغذية وعالية الجودة يومياً.",
+      "active": true,
+      "order": 5
+    }
+  ]
+}

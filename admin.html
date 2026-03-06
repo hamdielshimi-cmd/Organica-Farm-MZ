@@ -1,0 +1,2116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Orgánica Admin Panel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --g: #4A6741;
+      --gl: #7A9A7E;
+      --a: #D47A2C;
+      --al: #E89E5F;
+      --bg: #f4f6f3;
+      --white: #fff;
+      --text: #1a1a1a;
+      --tl: #666;
+      --red: #e53935;
+      --red-l: #ffebee;
+      --green: #2e7d32;
+      --green-l: #e8f5e9;
+      --shadow: 0 4px 20px rgba(0, 0, 0, .08);
+      --blue: #1565c0;
+      --blue-l: #e3f2fd;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh
+    }
+
+    /* ── LOGIN ── */
+    #loginScreen {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #2d4a2a, #4A6741)
+    }
+
+    .login-card {
+      background: var(--white);
+      border-radius: 24px;
+      padding: 48px 40px;
+      max-width: 420px;
+      width: 90%;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, .3);
+      text-align: center
+    }
+
+    .login-card h1 {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--g);
+      margin-bottom: 6px
+    }
+
+    .login-card p {
+      color: var(--tl);
+      font-size: .9rem;
+      margin-bottom: 32px
+    }
+
+    .login-field {
+      width: 100%;
+      padding: 13px 16px;
+      border: 2px solid #ddd;
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: .95rem;
+      margin-bottom: 14px;
+      transition: border-color .2s
+    }
+
+    .login-field:focus {
+      outline: none;
+      border-color: var(--g)
+    }
+
+    .login-btn {
+      width: 100%;
+      padding: 14px;
+      background: var(--g);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all .2s
+    }
+
+    .login-btn:hover {
+      background: #3a5432;
+      transform: translateY(-1px)
+    }
+
+    .login-btn:disabled {
+      opacity: .6;
+      cursor: not-allowed;
+      transform: none
+    }
+
+    .login-error {
+      background: var(--red-l);
+      color: var(--red);
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: .85rem;
+      margin-top: 10px;
+      display: none
+    }
+
+    /* ── LAYOUT ── */
+    #adminApp {
+      display: none;
+      min-height: 100vh
+    }
+
+    .topbar {
+      background: var(--g);
+      color: #fff;
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, .2)
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 12px
+    }
+
+    .topbar h2 {
+      font-size: 1.1rem;
+      font-weight: 800;
+      letter-spacing: .5px
+    }
+
+    .topbar-badge {
+      background: rgba(255, 255, 255, .2);
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: .75rem
+    }
+
+    .logout-btn {
+      background: rgba(255, 255, 255, .15);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, .3);
+      padding: 7px 16px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: .8rem;
+      font-weight: 600;
+      transition: all .2s
+    }
+
+    .logout-btn:hover {
+      background: rgba(255, 255, 255, .25)
+    }
+
+    .admin-body {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      min-height: calc(100vh - 52px)
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      background: var(--white);
+      border-right: 1px solid #e8ede8;
+      padding: 24px 0;
+      overflow-y: auto
+    }
+
+    .sidebar-section {
+      margin-bottom: 8px
+    }
+
+    .sidebar-label {
+      font-size: .65rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--tl);
+      padding: 0 20px;
+      margin-bottom: 6px
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 20px;
+      cursor: pointer;
+      font-size: .88rem;
+      font-weight: 600;
+      color: var(--text);
+      transition: all .2s;
+      border-left: 3px solid transparent
+    }
+
+    .nav-item:hover {
+      background: #f0f5f0;
+      color: var(--g)
+    }
+
+    .nav-item.active {
+      background: #e8f0e8;
+      color: var(--g);
+      border-left-color: var(--g)
+    }
+
+    .nav-item i {
+      width: 18px;
+      text-align: center;
+      font-size: .9rem
+    }
+
+    /* ── MAIN ── */
+    .main-panel {
+      padding: 32px;
+      overflow-y: auto
+    }
+
+    .panel-view {
+      display: none
+    }
+
+    .panel-view.active {
+      display: block
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+      gap: 12px
+    }
+
+    .panel-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--text)
+    }
+
+    .panel-subtitle {
+      font-size: .85rem;
+      color: var(--tl);
+      margin-top: 3px
+    }
+
+    /* ── BUTTONS ── */
+    .btn {
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: .88rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      transition: all .2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px
+    }
+
+    .btn-primary {
+      background: var(--g);
+      color: #fff
+    }
+
+    .btn-primary:hover {
+      background: #3a5432;
+      transform: translateY(-1px)
+    }
+
+    .btn-accent {
+      background: var(--a);
+      color: #fff
+    }
+
+    .btn-accent:hover {
+      background: var(--al)
+    }
+
+    .btn-danger {
+      background: var(--red);
+      color: #fff
+    }
+
+    .btn-danger:hover {
+      background: #c62828
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--g);
+      border: 2px solid var(--g)
+    }
+
+    .btn-ghost:hover {
+      background: #e8f0e8
+    }
+
+    .btn-blue {
+      background: var(--blue);
+      color: #fff
+    }
+
+    .btn-blue:hover {
+      background: #0d47a1
+    }
+
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: .78rem;
+      border-radius: 8px
+    }
+
+    .btn:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+      transform: none !important
+    }
+
+    /* ── CARDS ── */
+    .card {
+      background: var(--white);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: var(--shadow);
+      margin-bottom: 16px
+    }
+
+    /* ── STATS ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px
+    }
+
+    .stat-card {
+      background: var(--white);
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: var(--shadow);
+      text-align: center
+    }
+
+    .stat-num {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--g)
+    }
+
+    .stat-label {
+      font-size: .78rem;
+      color: var(--tl);
+      margin-top: 4px
+    }
+
+    /* ── PRODUCT TABLE ── */
+    .product-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto auto auto auto;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 0;
+      border-bottom: 1px solid #f0f0f0
+    }
+
+    .product-row:last-child {
+      border-bottom: none
+    }
+
+    .product-row-name {
+      font-weight: 700;
+      font-size: .9rem
+    }
+
+    .product-row-name small {
+      display: block;
+      color: var(--tl);
+      font-size: .78rem;
+      font-weight: 400
+    }
+
+    .product-row-price {
+      font-weight: 700;
+      color: var(--a);
+      font-size: .9rem
+    }
+
+    .product-row-type {
+      font-size: .75rem;
+      background: #eef4ee;
+      color: var(--g);
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-weight: 600;
+      white-space: nowrap
+    }
+
+    .section-header-row {
+      background: #f8faf8;
+      padding: 8px 12px;
+      border-radius: 8px;
+      margin: 12px 0 4px;
+      font-size: .72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--g)
+    }
+
+    /* ── TOGGLE ── */
+    .toggle {
+      position: relative;
+      width: 40px;
+      height: 22px
+    }
+
+    .toggle input {
+      opacity: 0;
+      width: 0;
+      height: 0
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: #ccc;
+      border-radius: 22px;
+      transition: .3s
+    }
+
+    .slider:before {
+      content: '';
+      position: absolute;
+      height: 16px;
+      width: 16px;
+      left: 3px;
+      bottom: 3px;
+      background: white;
+      border-radius: 50%;
+      transition: .3s
+    }
+
+    input:checked+.slider {
+      background: var(--g)
+    }
+
+    input:checked+.slider:before {
+      transform: translateX(18px)
+    }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, .5);
+      z-index: 200;
+      align-items: center;
+      justify-content: center
+    }
+
+    .modal-overlay.open {
+      display: flex
+    }
+
+    .modal {
+      background: var(--white);
+      border-radius: 20px;
+      padding: 32px;
+      max-width: 580px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, .3)
+    }
+
+    .modal h3 {
+      font-size: 1.2rem;
+      font-weight: 800;
+      margin-bottom: 20px;
+      color: var(--g)
+    }
+
+    .form-row {
+      margin-bottom: 16px
+    }
+
+    .form-row label {
+      display: block;
+      font-size: .8rem;
+      font-weight: 700;
+      color: var(--tl);
+      margin-bottom: 5px;
+      text-transform: uppercase;
+      letter-spacing: .5px
+    }
+
+    .form-row input,
+    .form-row select,
+    .form-row textarea {
+      width: 100%;
+      padding: 11px 14px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: .9rem;
+      transition: border-color .2s
+    }
+
+    .form-row input:focus,
+    .form-row select:focus,
+    .form-row textarea:focus {
+      outline: none;
+      border-color: var(--g)
+    }
+
+    .form-row textarea {
+      resize: vertical;
+      min-height: 80px
+    }
+
+    .form-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid #eee
+    }
+
+    /* ── PUBLISH BAR ── */
+    .publish-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--white);
+      border-top: 2px solid #e8ede8;
+      padding: 14px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 150;
+      box-shadow: 0 -4px 20px rgba(0, 0, 0, .08);
+      transform: translateY(100%);
+      transition: transform .3s
+    }
+
+    .publish-bar.visible {
+      transform: translateY(0)
+    }
+
+    .publish-info {
+      display: flex;
+      align-items: center;
+      gap: 10px
+    }
+
+    .publish-dot {
+      width: 10px;
+      height: 10px;
+      background: var(--a);
+      border-radius: 50%;
+      animation: pulse 1.5s infinite
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: .4
+      }
+    }
+
+    .publish-text {
+      font-weight: 700;
+      font-size: .9rem
+    }
+
+    .publish-sub {
+      font-size: .78rem;
+      color: var(--tl)
+    }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: var(--green);
+      color: #fff;
+      padding: 14px 20px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: .9rem;
+      z-index: 999;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transform: translateX(120%);
+      transition: transform .3s;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, .2)
+    }
+
+    .toast.error {
+      background: var(--red)
+    }
+
+    .toast.show {
+      transform: translateX(0)
+    }
+
+    /* ── BUNDLE CARD ── */
+    .bundle-admin-card {
+      background: var(--white);
+      border: 2px solid #e8ede8;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 14px
+    }
+
+    .bundle-admin-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+      gap: 10px
+    }
+
+    .bundle-admin-name {
+      font-weight: 800;
+      font-size: 1rem
+    }
+
+    .bundle-admin-price {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--a)
+    }
+
+    .bundle-admin-desc {
+      font-size: .82rem;
+      color: var(--tl);
+      margin-bottom: 10px
+    }
+
+    /* ── SECTION MANAGER ── */
+    .section-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      background: var(--white);
+      border: 2px solid #e8ede8;
+      border-radius: 12px;
+      margin-bottom: 10px
+    }
+
+    .section-row-labels {
+      flex: 1
+    }
+
+    .section-row-en {
+      font-weight: 700;
+      font-size: .95rem
+    }
+
+    .section-row-ar {
+      font-size: .82rem;
+      color: var(--tl);
+      margin-top: 2px
+    }
+
+    .section-row-id {
+      font-size: .7rem;
+      background: #f0f0f0;
+      padding: 2px 8px;
+      border-radius: 20px;
+      color: var(--tl);
+      font-family: monospace
+    }
+
+    /* ── FAQ MANAGER ── */
+    .faq-admin-card {
+      background: var(--white);
+      border: 2px solid #e8ede8;
+      border-radius: 14px;
+      padding: 18px 20px;
+      margin-bottom: 12px;
+      transition: border-color .2s
+    }
+
+    .faq-admin-card.hidden-faq {
+      border-color: #ffcdd2;
+      background: #fff8f8
+    }
+
+    .faq-admin-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px
+    }
+
+    .faq-admin-q {
+      font-weight: 700;
+      font-size: .9rem;
+      flex: 1;
+      line-height: 1.4
+    }
+
+    .faq-admin-q-ar {
+      font-size: .82rem;
+      color: var(--tl);
+      margin-top: 3px
+    }
+
+    .faq-order-btns {
+      display: flex;
+      flex-direction: column;
+      gap: 3px
+    }
+
+    .order-btn {
+      width: 26px;
+      height: 26px;
+      border: 1.5px solid #ddd;
+      background: #f8f8f8;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: .75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all .2s
+    }
+
+    .order-btn:hover {
+      background: var(--g);
+      color: #fff;
+      border-color: var(--g)
+    }
+
+    /* ── META SETTINGS ── */
+    .meta-group {
+      background: var(--white);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow)
+    }
+
+    .meta-group-title {
+      font-size: .75rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--g);
+      margin-bottom: 18px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #eef4ee
+    }
+
+    .test-result {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: .8rem;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 20px;
+      margin-left: 10px
+    }
+
+    .test-result.ok {
+      background: var(--green-l);
+      color: var(--green)
+    }
+
+    .test-result.fail {
+      background: var(--red-l);
+      color: var(--red)
+    }
+
+    /* ── PUBLISH PREVIEW MODAL ── */
+    .diff-section {
+      margin-bottom: 16px
+    }
+
+    .diff-section-title {
+      font-size: .75rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--tl);
+      margin-bottom: 8px
+    }
+
+    .diff-item {
+      font-size: .85rem;
+      padding: 6px 10px;
+      border-radius: 8px;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px
+    }
+
+    .diff-item.added {
+      background: #e8f5e9;
+      color: #2e7d32
+    }
+
+    .diff-item.modified {
+      background: #fff3e0;
+      color: #e65100
+    }
+
+    .diff-item.removed {
+      background: #ffebee;
+      color: #c62828
+    }
+
+    .diff-item.unchanged {
+      background: #f5f5f5;
+      color: #666
+    }
+
+    .diff-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0
+    }
+
+    .diff-dot.added {
+      background: #2e7d32
+    }
+
+    .diff-dot.modified {
+      background: #e65100
+    }
+
+    .diff-dot.removed {
+      background: #c62828
+    }
+
+    /* ── UNDO BAR ── */
+    .undo-btn {
+      background: rgba(255, 255, 255, .15);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, .3);
+      padding: 6px 14px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: .78rem;
+      font-weight: 600;
+      transition: all .2s
+    }
+
+    .undo-btn:hover {
+      background: rgba(255, 255, 255, .25)
+    }
+
+    .undo-btn:disabled {
+      opacity: .4;
+      cursor: not-allowed
+    }
+
+    @media(max-width:768px) {
+      .admin-body {
+        grid-template-columns: 1fr
+      }
+
+      .sidebar {
+        display: none
+      }
+
+      .product-row {
+        grid-template-columns: 1fr auto auto
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ══ LOGIN ══════════════════════════════════════════════════════ -->
+  <div id="loginScreen">
+    <div class="login-card">
+      <h1>🌿 Orgánica</h1>
+      <p>Admin Panel — enter your GitHub PAT to continue</p>
+      <input class="login-field" type="password" id="patInput" placeholder="GitHub Personal Access Token"
+        autocomplete="off" spellcheck="false">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:18px;cursor:pointer;user-select:none"
+        onclick="document.getElementById('rememberMe').click()">
+        <input type="checkbox" id="rememberMe" style="width:18px;height:18px;cursor:pointer">
+        <span style="font-size:.9rem;color:var(--tl)">Remember this token on this device</span>
+      </div>
+      <div style="font-size:.75rem;color:var(--tl);margin-bottom:14px;text-align:left">
+        Repo: <strong>hamdielshimi-cmd / Organica-Mo-Khaled</strong> &nbsp;·&nbsp; Branch: <strong>main</strong>
+      </div>
+      <button class="login-btn" id="loginBtn" onclick="doLogin()">🔐 Connect &amp; Load Data</button>
+      <div class="login-error" id="loginError"></div>
+    </div>
+  </div>
+
+  <!-- ══ ADMIN APP ═══════════════════════════════════════════════════ -->
+  <div id="adminApp">
+    <div class="topbar">
+      <div class="topbar-left">
+        <span>🌿</span>
+        <h2>Orgánica Admin</h2>
+        <span class="topbar-badge">hamdielshimi-cmd/Organica-Mo-Khaled</span>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="undo-btn" id="undoBtn" onclick="undoChange()" disabled title="Undo last change">↩ Undo</button>
+        <button class="logout-btn" onclick="doLogout()">↩ Logout</button>
+      </div>
+    </div>
+
+    <div class="admin-body">
+      <!-- SIDEBAR -->
+      <div class="sidebar">
+        <div class="sidebar-section">
+          <div class="sidebar-label">Overview</div>
+          <div class="nav-item active" onclick="showPanel('dashboard')" id="nav-dashboard"><i>📊</i> Dashboard</div>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-label">Catalog</div>
+          <div class="nav-item" onclick="showPanel('products')" id="nav-products"><i>🐔</i> Products</div>
+          <div class="nav-item" onclick="showPanel('bundles')" id="nav-bundles"><i>🌙</i> Ramadan Bundles</div>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-label">Content</div>
+          <div class="nav-item" onclick="showPanel('faq')" id="nav-faq"><i>❓</i> FAQ Manager</div>
+          <div class="nav-item" onclick="showPanel('sections')" id="nav-sections"><i>🗂️</i> Section Manager</div>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-label">Settings</div>
+          <div class="nav-item" onclick="showPanel('meta')" id="nav-meta"><i>⚙️</i> Site Settings</div>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-label">Publish</div>
+          <div class="nav-item" onclick="openPublishPreview()" id="nav-publish"><i>🚀</i> Publish Changes</div>
+        </div>
+      </div>
+
+      <!-- MAIN PANEL -->
+      <div class="main-panel" style="padding-bottom:100px">
+
+        <!-- ── DASHBOARD ── -->
+        <div class="panel-view active" id="panel-dashboard">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">Dashboard</div>
+              <div class="panel-subtitle">Overview of your Orgánica store</div>
+            </div>
+          </div>
+          <div class="stats-grid" id="statsGrid"></div>
+          <div class="card">
+            <h3 style="font-weight:800;margin-bottom:16px;font-size:1rem">📋 Quick Actions</h3>
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+              <button class="btn btn-primary" onclick="showPanel('products');openAddProduct()">+ Add Product</button>
+              <button class="btn btn-accent" onclick="showPanel('bundles')">🌙 Edit Bundles</button>
+              <button class="btn btn-blue" onclick="showPanel('faq')">❓ Manage FAQ</button>
+              <button class="btn btn-ghost" onclick="openPublishPreview()">🚀 Publish to Live Site</button>
+            </div>
+          </div>
+          <div class="card">
+            <h3 style="font-weight:800;margin-bottom:4px;font-size:1rem">ℹ️ How it works</h3>
+            <p style="font-size:.85rem;color:var(--tl);line-height:1.7;margin-top:8px">
+              1. Edit products, bundles, FAQ, sections, and site settings using the sidebar.<br>
+              2. Click <strong>Publish Changes</strong> — preview your diff, then confirm to save
+              <code>Control/config.json</code> to GitHub.<br>
+              3. Your live site updates within ~30 seconds.<br>
+              4. Use <strong>Undo</strong> to revert the last change before publishing.
+            </p>
+          </div>
+        </div>
+
+        <!-- ── PRODUCTS ── -->
+        <div class="panel-view" id="panel-products">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">Products</div>
+              <div class="panel-subtitle">All items in the price list &amp; calculator</div>
+            </div>
+            <button class="btn btn-primary" onclick="openAddProduct()">+ Add Product</button>
+          </div>
+          <div class="card">
+            <div id="productList"></div>
+          </div>
+        </div>
+
+        <!-- ── BUNDLES ── -->
+        <div class="panel-view" id="panel-bundles">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">Ramadan Bundles</div>
+              <div class="panel-subtitle">Add, edit, toggle and delete bundles</div>
+            </div>
+            <button class="btn btn-primary" onclick="openAddBundle()">+ Add Bundle</button>
+          </div>
+          <div id="bundleList"></div>
+        </div>
+
+        <!-- ── FAQ MANAGER ── -->
+        <div class="panel-view" id="panel-faq">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">FAQ Manager</div>
+              <div class="panel-subtitle">Add, edit, reorder, show/hide FAQ items</div>
+            </div>
+            <button class="btn btn-primary" onclick="openAddFaq()">+ Add Question</button>
+          </div>
+          <div id="faqAdminList"></div>
+        </div>
+
+        <!-- ── SECTION MANAGER ── -->
+        <div class="panel-view" id="panel-sections">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">Section Manager</div>
+              <div class="panel-subtitle">Add, rename, reorder product sections</div>
+            </div>
+            <button class="btn btn-primary" onclick="openAddSection()">+ Add Section</button>
+          </div>
+          <div id="sectionList"></div>
+          <div class="card" style="background:#fff8e1;border:1.5px solid #ffe082;margin-top:8px">
+            <p style="font-size:.85rem;color:#856404">⚠️ Deleting a section will move its products to "Other." Rename
+              freely — the internal ID does not change.</p>
+          </div>
+        </div>
+
+        <!-- ── META SETTINGS ── -->
+        <div class="panel-view" id="panel-meta">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">Site Settings</div>
+              <div class="panel-subtitle">WhatsApp, delivery, Apps Script connection</div>
+            </div>
+            <button class="btn btn-primary" onclick="saveMeta()">💾 Save Settings</button>
+          </div>
+          <div class="meta-group">
+            <div class="meta-group-title">🌐 General</div>
+            <div class="form-grid-2">
+              <div class="form-row"><label>Site Name (EN)</label><input type="text" id="metaSiteName"></div>
+              <div class="form-row"><label>Site Name (AR)</label><input type="text" id="metaSiteNameAr" dir="rtl"></div>
+            </div>
+            <div class="form-grid-2">
+              <div class="form-row"><label>Hero Tagline (EN)</label><input type="text" id="metaTagline"></div>
+              <div class="form-row"><label>Hero Tagline (AR)</label><input type="text" id="metaTaglineAr" dir="rtl">
+              </div>
+            </div>
+          </div>
+          <div class="meta-group">
+            <div class="meta-group-title">📦 Delivery</div>
+            <div class="form-grid-2">
+              <div class="form-row"><label>WhatsApp Number (digits only)</label><input type="text" id="metaWhatsapp"
+                  placeholder="201067776664"></div>
+              <div class="form-row"><label>Delivery Fee (EGP)</label><input type="number" id="metaDeliveryFee"></div>
+            </div>
+            <div class="form-grid-2">
+              <div class="form-row"><label>Delivery Hours (EN)</label><input type="text" id="metaDeliveryHours"></div>
+              <div class="form-row"><label>Delivery Hours (AR)</label><input type="text" id="metaDeliveryHoursAr"
+                  dir="rtl"></div>
+            </div>
+            <div class="form-row" style="display:flex;align-items:center;gap:12px;margin-top:8px">
+              <label style="text-transform:none;letter-spacing:0;font-size:.9rem;margin:0">Show Ramadan Section</label>
+              <label class="toggle">
+                <input type="checkbox" id="metaRamadanVisible">
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+          <div class="meta-group">
+            <div class="meta-group-title">🔌 Google Apps Script Connection</div>
+            <div class="form-row">
+              <label>Apps Script Web App URL</label>
+              <input type="text" id="metaAppScriptURL" placeholder="https://script.google.com/macros/s/...">
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;margin-top:4px">
+              <button class="btn btn-ghost btn-sm" onclick="testAppScript()">🧪 Test Connection</button>
+              <span id="testResult" style="font-size:.8rem;color:var(--tl)"></span>
+            </div>
+            <p style="font-size:.8rem;color:var(--tl);margin-top:10px;line-height:1.6">
+              This URL is used by the live site to record every submitted order into your Google Sheet. Store it here —
+              no hardcoding needed in index.html.
+            </p>
+          </div>
+        </div>
+
+      </div><!-- /main-panel -->
+    </div><!-- /admin-body -->
+  </div><!-- /adminApp -->
+
+  <!-- ══ PUBLISH BAR ══════════════════════════════════════════════ -->
+  <div class="publish-bar" id="publishBar">
+    <div class="publish-info">
+      <div class="publish-dot"></div>
+      <div>
+        <div class="publish-text">You have unpublished changes</div>
+        <div class="publish-sub" id="publishSubText">Click Preview &amp; Publish to update your live site</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-ghost btn-sm" onclick="discardChanges()">Discard All</button>
+      <button class="btn btn-accent" onclick="openPublishPreview()" id="publishBtn">🚀 Preview &amp; Publish</button>
+    </div>
+  </div>
+
+  <!-- ══ TOAST ═══════════════════════════════════════════════════ -->
+  <div class="toast" id="toast"></div>
+
+  <!-- ══ PRODUCT MODAL ═══════════════════════════════════════════ -->
+  <div class="modal-overlay" id="productModal">
+    <div class="modal">
+      <h3 id="modalTitle">Add New Product</h3>
+      <div class="form-row"><label>English Name *</label><input type="text" id="pNameEn" placeholder="e.g. Rabbit">
+      </div>
+      <div class="form-row"><label>Arabic Name *</label><input type="text" id="pNameAr" placeholder="e.g. أرنب"
+          dir="rtl"></div>
+      <div class="form-row">
+        <label>Section</label>
+        <select id="pSection"></select>
+      </div>
+      <div class="form-row">
+        <label>Pricing Type</label>
+        <select id="pPricingType" onchange="togglePriceFields()">
+          <option value="variable_weight">Variable Weight (per kg, customer picks weight)</option>
+          <option value="fixed">Fixed Price (per kg / per pair / per piece)</option>
+        </select>
+      </div>
+      <div id="varWeightFields">
+        <div class="form-row"><label>Price per kg (EGP)</label><input type="number" id="pPricePerKg" placeholder="190">
+        </div>
+        <div class="form-grid-2">
+          <div class="form-row"><label>Default Weight (g)</label><input type="number" id="pDefaultW" placeholder="1200"
+              step="100"></div>
+          <div class="form-row"><label>Max Weight (g)</label><input type="number" id="pMaxW" placeholder="2500"
+              step="100"></div>
+        </div>
+      </div>
+      <div id="fixedFields" style="display:none">
+        <div class="form-grid-2">
+          <div class="form-row"><label>Fixed Price (EGP)</label><input type="number" id="pFixedPrice" placeholder="275">
+          </div>
+          <div class="form-row"><label>Unit (EN)</label><input type="text" id="pFixedUnit"
+              placeholder="kg / pair / piece"></div>
+        </div>
+        <div class="form-row"><label>Unit (AR)</label><input type="text" id="pFixedUnitAr"
+            placeholder="كجم / زوج / قطعة" dir="rtl"></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closeModal('productModal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveProduct()">💾 Save Product</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ BUNDLE MODAL ═════════════════════════════════════════════ -->
+  <div class="modal-overlay" id="bundleModal">
+    <div class="modal">
+      <h3 id="bundleModalTitle">Add Bundle</h3>
+      <div class="form-grid-2">
+        <div class="form-row"><label>Name (EN)</label><input type="text" id="bNameEn"></div>
+        <div class="form-row"><label>Name (AR)</label><input type="text" id="bNameAr" dir="rtl"></div>
+      </div>
+      <div class="form-grid-2">
+        <div class="form-row"><label>Badge (EN)</label><input type="text" id="bBadgeEn" placeholder="Small Family">
+        </div>
+        <div class="form-row"><label>Badge (AR)</label><input type="text" id="bBadgeAr" dir="rtl"
+            placeholder="العيلة الصغيرة"></div>
+      </div>
+      <div class="form-grid-2">
+        <div class="form-row"><label>Badge Emoji</label><input type="text" id="bBadgeEmoji" placeholder="🌿"></div>
+        <div class="form-row"><label>Bundle Price (EGP)</label><input type="number" id="bPrice"></div>
+      </div>
+      <div class="form-grid-2">
+        <div class="form-row"><label>Original Price (strikethrough)</label><input type="text" id="bOriginalPriceEn"
+            placeholder="1,190"></div>
+        <div class="form-row"><label>Savings Text (EN)</label><input type="text" id="bSaveEn"
+            placeholder="Save 100 EGP · ~8%"></div>
+      </div>
+      <div class="form-row"><label>Savings Text (AR)</label><input type="text" id="bSaveAr" dir="rtl"
+          placeholder="وفّر ١٠٠ ج · ٨٪"></div>
+      <div class="form-row"><label>Persons Line (EN)</label><input type="text" id="bPersonsEn"
+          placeholder="👨‍👩‍👧‍👦 Ideal for 4 persons"></div>
+      <div class="form-row"><label>Persons Line (AR)</label><input type="text" id="bPersonsAr" dir="rtl"></div>
+      <div class="form-row"><label>Contents (EN) — one item per line</label><textarea id="bContentsEn"
+          rows="4"></textarea></div>
+      <div class="form-row"><label>Contents (AR) — one item per line</label><textarea id="bContentsAr" dir="rtl"
+          rows="4"></textarea></div>
+      <div class="form-row"><label>Short Description (EN)</label><input type="text" id="bDescEn"></div>
+      <div class="form-row"><label>Short Description (AR)</label><input type="text" id="bDescAr" dir="rtl"></div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closeModal('bundleModal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveBundle()">💾 Save Bundle</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ FAQ MODAL ════════════════════════════════════════════════ -->
+  <div class="modal-overlay" id="faqModal">
+    <div class="modal">
+      <h3 id="faqModalTitle">Add FAQ Item</h3>
+      <div class="form-row"><label>Question (EN) *</label><input type="text" id="fqQuestionEn"></div>
+      <div class="form-row"><label>Question (AR) *</label><input type="text" id="fqQuestionAr" dir="rtl"></div>
+      <div class="form-row"><label>Answer (EN) *</label><textarea id="fqAnswerEn" rows="4"></textarea></div>
+      <div class="form-row"><label>Answer (AR) *</label><textarea id="fqAnswerAr" dir="rtl" rows="4"></textarea></div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closeModal('faqModal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveFaq()">💾 Save Question</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SECTION MODAL ════════════════════════════════════════════ -->
+  <div class="modal-overlay" id="sectionModal">
+    <div class="modal">
+      <h3 id="sectionModalTitle">Add Section</h3>
+      <div class="form-row"><label>Label (EN) *</label><input type="text" id="secLabelEn"
+          placeholder="e.g. 🐔 Whole Poultry"></div>
+      <div class="form-row"><label>Label (AR) *</label><input type="text" id="secLabelAr" dir="rtl"
+          placeholder="e.g. 🐔 دواجن كاملة"></div>
+      <div class="form-row" id="secIdRow">
+        <label>Section ID * (lowercase, underscores only — cannot change later)</label>
+        <input type="text" id="secId" placeholder="e.g. whole_poultry">
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closeModal('sectionModal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveSection()">💾 Save Section</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PUBLISH PREVIEW MODAL ════════════════════════════════════ -->
+  <div class="modal-overlay" id="previewModal">
+    <div class="modal" style="max-width:680px">
+      <h3>🚀 Review Changes Before Publishing</h3>
+      <div id="diffContainer" style="max-height:55vh;overflow-y:auto;padding-right:4px"></div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closeModal('previewModal')">Cancel</button>
+        <button class="btn btn-accent" onclick="publishNow()" id="confirmPublishBtn">✅ Confirm &amp; Publish</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ════════════════════════════════════════════════════════════════
+    //  CONFIG
+    // ════════════════════════════════════════════════════════════════
+    const GITHUB_OWNER = 'hamdielshimi-cmd';
+    const GITHUB_REPO = 'Organica-Mo-Khaled';
+    const GITHUB_BRANCH = 'main';
+    const CONFIG_PATH = 'Control/config.json';
+
+    let PAT = '';
+    let configData = null;
+    let configSHA = '';
+    let isDirty = false;
+    let editingProductId = null;
+    let editingBundleId = null;
+    let editingFaqId = null;
+    let editingSectionId = null;
+
+    // Undo stack — stores deep copies of configData (max 10)
+    let undoStack = [];
+
+    // ════════════════════════════════════════════════════════════════
+    //  LOGIN
+    // ════════════════════════════════════════════════════════════════
+    async function doLogin() {
+      const pat = document.getElementById('patInput').value.trim();
+      const remember = document.getElementById('rememberMe').checked;
+      if (!pat) { showLoginError('Please enter your GitHub PAT.'); return; }
+      const btn = document.getElementById('loginBtn');
+      btn.textContent = '⏳ Connecting…'; btn.disabled = true;
+      try {
+        const res = await ghGet(CONFIG_PATH, pat);
+        if (res.status === 404) {
+          PAT = pat;
+          if (remember) localStorage.setItem('org_admin_pat', pat);
+          configData = getDefaultConfig();
+          configSHA = '';
+          launchApp();
+        } else if (res.ok) {
+          const json = await res.json();
+          configSHA = json.sha;
+          // ✅ FIX: Use TextDecoder instead of deprecated escape()
+          const b64 = json.content.replace(/\n/g, '');
+          const bytes = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+          configData = JSON.parse(new TextDecoder('utf-8').decode(bytes));
+          PAT = pat;
+          if (remember) localStorage.setItem('org_admin_pat', pat);
+          launchApp();
+        } else if (res.status === 401) {
+          showLoginError('Invalid token — check your PAT and try again.');
+        } else {
+          showLoginError('Error ' + res.status + ' — could not connect to GitHub.');
+        }
+      } catch (e) {
+        showLoginError('Network error: ' + e.message);
+      }
+      btn.textContent = '🔐 Connect & Load Data'; btn.disabled = false;
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const saved = localStorage.getItem('org_admin_pat');
+      if (saved) {
+        document.getElementById('patInput').value = saved;
+        document.getElementById('rememberMe').checked = true;
+      }
+      document.getElementById('patInput').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+    });
+
+    function doLogout() {
+      PAT = ''; configData = null; configSHA = ''; isDirty = false; undoStack = [];
+      localStorage.removeItem('org_admin_pat');
+      document.getElementById('adminApp').style.display = 'none';
+      document.getElementById('loginScreen').style.display = 'flex';
+      document.getElementById('patInput').value = '';
+      document.getElementById('rememberMe').checked = false;
+    }
+
+    function showLoginError(msg) {
+      const el = document.getElementById('loginError');
+      el.textContent = msg; el.style.display = 'block';
+    }
+
+    function launchApp() {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('adminApp').style.display = 'block';
+      renderAll();
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  GITHUB API
+    // ════════════════════════════════════════════════════════════════
+    function ghGet(path, token) {
+      return fetch('https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/contents/' + path + '?ref=' + GITHUB_BRANCH, {
+        headers: { Authorization: 'token ' + (token || PAT), Accept: 'application/vnd.github.v3+json' }
+      });
+    }
+
+    async function ghPut(body) {
+      return fetch('https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/contents/' + CONFIG_PATH, {
+        method: 'PUT',
+        headers: { Authorization: 'token ' + PAT, 'Content-Type': 'application/json', Accept: 'application/vnd.github.v3+json' },
+        body: JSON.stringify(body)
+      });
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  PUBLISH — with preview, SHA conflict retry, and clear errors
+    // ════════════════════════════════════════════════════════════════
+    function openPublishPreview() {
+      if (!isDirty) { showToast('Nothing to publish — no changes made.'); return; }
+      buildDiff();
+      document.getElementById('previewModal').classList.add('open');
+    }
+
+    function buildDiff() {
+      const container = document.getElementById('diffContainer');
+      let html = '';
+
+      // Products summary
+      const counts = { added: 0, modified: 0, removed: 0 };
+      html += buildDiffSection('🐔 Products', configData.products.map(p => ({
+        label: p.nameEn + (p.active ? '' : ' [hidden]'),
+        type: 'unchanged'
+      })));
+
+      html += buildDiffSection('🌙 Bundles', configData.ramadanBundles.map(b => ({
+        label: b.nameEn + ' — ' + b.bundlePrice + ' EGP' + (b.active ? '' : ' [hidden]'),
+        type: 'unchanged'
+      })));
+
+      html += buildDiffSection('🗂️ Sections', configData.sections.map(s => ({
+        label: s.labelEn,
+        type: 'unchanged'
+      })));
+
+      html += buildDiffSection('❓ FAQ Items', (configData.faqItems || []).map(f => ({
+        label: f.questionEn + (f.active ? '' : ' [hidden]'),
+        type: 'unchanged'
+      })));
+
+      html += `<div style="background:#f0f7f0;border-radius:10px;padding:14px 16px;margin-top:16px;font-size:.85rem;color:var(--g);font-weight:600">
+    ✅ The complete config.json will be saved to GitHub. Your live site updates within ~30 seconds.
+  </div>`;
+
+      container.innerHTML = html;
+    }
+
+    function buildDiffSection(title, items) {
+      if (!items.length) return '';
+      return `<div class="diff-section">
+    <div class="diff-section-title">${title} (${items.length} items)</div>
+    ${items.map(i => `<div class="diff-item unchanged"><div class="diff-dot unchanged" style="background:#ccc"></div>${i.label}</div>`).join('')}
+  </div>`;
+    }
+
+    async function publishNow() {
+      const btn = document.getElementById('confirmPublishBtn');
+      btn.textContent = '⏳ Publishing…'; btn.disabled = true;
+
+      const jsonString = JSON.stringify(configData, null, 2);
+      // ✅ FIX: Use TextEncoder for proper UTF-8 encoding
+      const bytes = new TextEncoder().encode(jsonString);
+      let binary = '';
+      bytes.forEach(b => binary += String.fromCharCode(b));
+      const content = btoa(binary);
+
+      const body = { message: 'Admin: update config.json', content, branch: GITHUB_BRANCH };
+      if (configSHA) body.sha = configSHA;
+
+      try {
+        let res = await ghPut(body);
+
+        // ✅ SHA CONFLICT RETRY: if 409 or 422, re-fetch SHA and retry once
+        if (res.status === 409 || res.status === 422) {
+          showToast('⚠️ SHA conflict detected — re-syncing and retrying…');
+          const freshRes = await ghGet(CONFIG_PATH);
+          if (freshRes.ok) {
+            const freshJson = await freshRes.json();
+            configSHA = freshJson.sha;
+            body.sha = configSHA;
+            res = await ghPut(body);
+          }
+        }
+
+        const json = await res.json();
+        if (res.ok) {
+          configSHA = json.content.sha;
+          isDirty = false;
+          undoStack = [];
+          updateUndoBtn();
+          closeModal('previewModal');
+          document.getElementById('publishBar').classList.remove('visible');
+          showToast('✅ Published! Your live site will update in ~30 seconds.');
+        } else {
+          // ✅ HUMAN-READABLE ERROR MESSAGES
+          const errMap = {
+            401: 'Authentication failed — your PAT may have expired.',
+            403: 'Permission denied — ensure your PAT has repo write access.',
+            404: 'Repository or file not found — check the repo name.',
+            409: 'Conflict — someone else published at the same time. Refresh and try again.',
+            422: 'Validation error — ' + (json.message || 'unknown'),
+            500: 'GitHub server error — try again in a moment.',
+          };
+          showToast('❌ ' + (errMap[res.status] || 'Publish failed: ' + (json.message || res.status)), true);
+        }
+      } catch (e) {
+        showToast('❌ Network error: ' + e.message, true);
+      }
+      btn.textContent = '✅ Confirm & Publish'; btn.disabled = false;
+    }
+
+    function discardChanges() {
+      if (confirm('Discard all unsaved changes and reload?')) location.reload();
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  UNDO
+    // ════════════════════════════════════════════════════════════════
+    function pushUndo() {
+      undoStack.push(JSON.parse(JSON.stringify(configData)));
+      if (undoStack.length > 10) undoStack.shift();
+      updateUndoBtn();
+    }
+
+    function undoChange() {
+      if (!undoStack.length) return;
+      configData = undoStack.pop();
+      updateUndoBtn();
+      renderAll();
+      if (!undoStack.length && !isDirty) {
+        document.getElementById('publishBar').classList.remove('visible');
+        isDirty = false;
+      }
+      showToast('↩ Undone — last change reverted.');
+    }
+
+    function updateUndoBtn() {
+      document.getElementById('undoBtn').disabled = undoStack.length === 0;
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  RENDER ALL
+    // ════════════════════════════════════════════════════════════════
+    function renderAll() {
+      renderStats();
+      renderProductList();
+      renderBundleList();
+      renderFaqList();
+      renderSectionList();
+      populateSectionDropdown();
+      populateMetaForm();
+    }
+
+    function markDirty() {
+      isDirty = true;
+      document.getElementById('publishBar').classList.add('visible');
+      renderStats();
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  DASHBOARD
+    // ════════════════════════════════════════════════════════════════
+    function renderStats() {
+      if (!configData) return;
+      const activeP = configData.products.filter(p => p.active).length;
+      const totalP = configData.products.length;
+      const activeB = configData.ramadanBundles.filter(b => b.active).length;
+      const activeFaq = (configData.faqItems || []).filter(f => f.active).length;
+      const totalFaq = (configData.faqItems || []).length;
+      document.getElementById('statsGrid').innerHTML = `
+    <div class="stat-card"><div class="stat-num">${totalP}</div><div class="stat-label">Total Products</div></div>
+    <div class="stat-card"><div class="stat-num">${activeP}</div><div class="stat-label">Active Products</div></div>
+    <div class="stat-card"><div class="stat-num">${totalP - activeP}</div><div class="stat-label">Hidden Products</div></div>
+    <div class="stat-card"><div class="stat-num">${activeB}</div><div class="stat-label">Active Bundles</div></div>
+    <div class="stat-card"><div class="stat-num">${activeFaq}/${totalFaq}</div><div class="stat-label">FAQ Items</div></div>
+    <div class="stat-card" style="border:2px solid ${isDirty ? 'var(--a)' : '#e8ede8'}">
+      <div class="stat-num" style="color:${isDirty ? 'var(--a)' : 'var(--g)'}">${isDirty ? '●' : '✓'}</div>
+      <div class="stat-label">${isDirty ? 'Unpublished changes' : 'All published'}</div>
+    </div>`;
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  PRODUCTS
+    // ════════════════════════════════════════════════════════════════
+    function renderProductList() {
+      if (!configData) return;
+      const sections = configData.sections || [];
+      let html = '';
+      const sortedSections = [...sections].sort((a, b) => (a.order || 0) - (b.order || 0));
+      sortedSections.forEach(sec => {
+        const prods = configData.products.filter(p => p.section === sec.id);
+        if (!prods.length) return;
+        html += `<div class="section-header-row">${sec.labelEn}</div>`;
+        prods.forEach(p => { html += productRowHTML(p); });
+      });
+      const knownIds = sections.map(s => s.id);
+      const others = configData.products.filter(p => !knownIds.includes(p.section));
+      if (others.length) {
+        html += `<div class="section-header-row">📦 Other</div>`;
+        others.forEach(p => { html += productRowHTML(p); });
+      }
+      document.getElementById('productList').innerHTML = html ||
+        '<p style="color:var(--tl);text-align:center;padding:20px">No products yet. Click "Add Product" to start.</p>';
+    }
+
+    function productRowHTML(p) {
+      const priceLabel = p.pricingType === 'variable_weight'
+        ? p.pricePerKg + ' EGP/kg'
+        : p.fixedPrice + ' EGP/' + (p.fixedUnit || 'kg');
+      return `<div class="product-row">
+    <div class="product-row-name">${p.nameEn}<small>${p.nameAr}</small></div>
+    <div class="product-row-price">${priceLabel}</div>
+    <div class="product-row-type">${p.pricingType === 'variable_weight' ? '⚖️ Variable' : '🏷 Fixed'}</div>
+    <label class="toggle"><input type="checkbox" ${p.active ? 'checked' : ''} onchange="toggleProduct('${p.id}',this.checked)"><span class="slider"></span></label>
+    <button class="btn btn-ghost btn-sm" onclick="openEditProduct('${p.id}')">✏️</button>
+    <button class="btn btn-danger btn-sm" onclick="deleteProduct('${p.id}')">🗑</button>
+  </div>`;
+    }
+
+    function toggleProduct(id, active) {
+      pushUndo();
+      const p = configData.products.find(x => x.id === id);
+      if (p) { p.active = active; markDirty(); }
+    }
+
+    function deleteProduct(id) {
+      const p = configData.products.find(x => x.id === id);
+      if (!p || !confirm('Delete "' + p.nameEn + '"? This cannot be undone.')) return;
+      pushUndo();
+      configData.products = configData.products.filter(x => x.id !== id);
+      markDirty(); renderProductList(); renderStats();
+      showToast('Product deleted. Publish to go live.');
+    }
+
+    function populateSectionDropdown() {
+      const sel = document.getElementById('pSection');
+      if (!sel || !configData) return;
+      sel.innerHTML = (configData.sections || []).map(s => `<option value="${s.id}">${s.labelEn}</option>`).join('');
+      sel.innerHTML += '<option value="other">📦 Other</option>';
+    }
+
+    function openAddProduct() {
+      editingProductId = null;
+      document.getElementById('modalTitle').textContent = 'Add New Product';
+      ['pNameEn', 'pNameAr', 'pPricePerKg', 'pFixedPrice', 'pFixedUnit', 'pFixedUnitAr'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('pDefaultW').value = '1200';
+      document.getElementById('pMaxW').value = '2500';
+      document.getElementById('pPricingType').value = 'variable_weight';
+      document.getElementById('pSection').value = configData.sections[0]?.id || 'whole_poultry';
+      togglePriceFields();
+      document.getElementById('productModal').classList.add('open');
+    }
+
+    function openEditProduct(id) {
+      const p = configData.products.find(x => x.id === id);
+      if (!p) return;
+      editingProductId = id;
+      document.getElementById('modalTitle').textContent = 'Edit Product';
+      document.getElementById('pNameEn').value = p.nameEn;
+      document.getElementById('pNameAr').value = p.nameAr;
+      document.getElementById('pSection').value = p.section || 'whole_poultry';
+      document.getElementById('pPricingType').value = p.pricingType;
+      if (p.pricingType === 'variable_weight') {
+        document.getElementById('pPricePerKg').value = p.pricePerKg || '';
+        document.getElementById('pDefaultW').value = p.defaultWeightG || 1200;
+        document.getElementById('pMaxW').value = p.maxWeightG || 2500;
+      } else {
+        document.getElementById('pFixedPrice').value = p.fixedPrice || '';
+        document.getElementById('pFixedUnit').value = p.fixedUnit || 'kg';
+        document.getElementById('pFixedUnitAr').value = p.fixedUnitAr || 'كجم';
+      }
+      togglePriceFields();
+      document.getElementById('productModal').classList.add('open');
+    }
+
+    function togglePriceFields() {
+      const t = document.getElementById('pPricingType').value;
+      document.getElementById('varWeightFields').style.display = t === 'variable_weight' ? 'block' : 'none';
+      document.getElementById('fixedFields').style.display = t === 'fixed' ? 'block' : 'none';
+    }
+
+    function saveProduct() {
+      const nameEn = document.getElementById('pNameEn').value.trim();
+      const nameAr = document.getElementById('pNameAr').value.trim();
+      if (!nameEn || !nameAr) { alert('Both English and Arabic names are required.'); return; }
+      pushUndo();
+      const type = document.getElementById('pPricingType').value;
+      const section = document.getElementById('pSection').value;
+      let product = editingProductId
+        ? configData.products.find(x => x.id === editingProductId)
+        : { id: 'prod_' + Date.now(), active: true };
+      if (!editingProductId) configData.products.push(product);
+      product.nameEn = nameEn; product.nameAr = nameAr; product.section = section; product.pricingType = type;
+      if (type === 'variable_weight') {
+        product.pricePerKg = parseFloat(document.getElementById('pPricePerKg').value) || 0;
+        product.defaultWeightG = parseInt(document.getElementById('pDefaultW').value) || 1200;
+        product.minWeightG = 800;
+        product.maxWeightG = parseInt(document.getElementById('pMaxW').value) || 2500;
+        delete product.fixedPrice; delete product.fixedUnit; delete product.fixedUnitAr;
+      } else {
+        product.fixedPrice = parseFloat(document.getElementById('pFixedPrice').value) || 0;
+        product.fixedUnit = document.getElementById('pFixedUnit').value.trim() || 'kg';
+        product.fixedUnitAr = document.getElementById('pFixedUnitAr').value.trim() || 'كجم';
+        delete product.pricePerKg; delete product.defaultWeightG; delete product.minWeightG; delete product.maxWeightG;
+      }
+      closeModal('productModal');
+      markDirty(); renderProductList();
+      showToast((editingProductId ? 'Product updated' : 'Product added') + '. Publish to go live!');
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  BUNDLES
+    // ════════════════════════════════════════════════════════════════
+    function renderBundleList() {
+      if (!configData) return;
+      let html = '';
+      configData.ramadanBundles.forEach(b => {
+        html += `<div class="bundle-admin-card" style="border-color:${b.active ? '#e8ede8' : '#fdd'}">
+      <div class="bundle-admin-header">
+        <div>
+          <div class="bundle-admin-name">${b.badgeEmoji || ''} ${b.nameEn}</div>
+          <div class="bundle-admin-desc">${b.nameAr}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <div class="bundle-admin-price">${b.bundlePrice} EGP</div>
+          <label class="toggle"><input type="checkbox" ${b.active ? 'checked' : ''} onchange="toggleBundle('${b.id}',this.checked)"><span class="slider"></span></label>
+          <button class="btn btn-ghost btn-sm" onclick="openEditBundle('${b.id}')">✏️ Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteBundle('${b.id}')">🗑</button>
+        </div>
+      </div>
+      <div style="font-size:.8rem;color:var(--tl)">${b.descEn || ''}</div>
+      <div style="font-size:.78rem;color:${b.active ? 'var(--green)' : 'var(--red)'};font-weight:700;margin-top:6px">${b.active ? '● Visible on site' : '○ Hidden from site'}</div>
+    </div>`;
+      });
+      document.getElementById('bundleList').innerHTML = html ||
+        '<div class="card" style="text-align:center;color:var(--tl);padding:30px">No bundles yet. Click "Add Bundle" to create one.</div>';
+    }
+
+    function toggleBundle(id, active) {
+      pushUndo();
+      const b = configData.ramadanBundles.find(x => x.id === id);
+      if (b) { b.active = active; markDirty(); renderBundleList(); renderStats(); }
+    }
+
+    function deleteBundle(id) {
+      const b = configData.ramadanBundles.find(x => x.id === id);
+      if (!b || !confirm('Delete "' + b.nameEn + '"?')) return;
+      pushUndo();
+      configData.ramadanBundles = configData.ramadanBundles.filter(x => x.id !== id);
+      markDirty(); renderBundleList(); renderStats();
+      showToast('Bundle deleted. Publish to go live.');
+    }
+
+    function openAddBundle() {
+      editingBundleId = null;
+      document.getElementById('bundleModalTitle').textContent = 'Add New Bundle';
+      ['bNameEn', 'bNameAr', 'bBadgeEn', 'bBadgeAr', 'bBadgeEmoji', 'bOriginalPriceEn', 'bSaveEn', 'bSaveAr',
+        'bPersonsEn', 'bPersonsAr', 'bContentsEn', 'bContentsAr', 'bDescEn', 'bDescAr'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('bPrice').value = '';
+      document.getElementById('bundleModal').classList.add('open');
+    }
+
+    function openEditBundle(id) {
+      const b = configData.ramadanBundles.find(x => x.id === id);
+      if (!b) return;
+      editingBundleId = id;
+      document.getElementById('bundleModalTitle').textContent = 'Edit Bundle — ' + b.nameEn;
+      document.getElementById('bNameEn').value = b.nameEn;
+      document.getElementById('bNameAr').value = b.nameAr;
+      document.getElementById('bBadgeEn').value = b.badgeEn || '';
+      document.getElementById('bBadgeAr').value = b.badgeAr || '';
+      document.getElementById('bBadgeEmoji').value = b.badgeEmoji || '';
+      document.getElementById('bPrice').value = b.bundlePrice;
+      document.getElementById('bOriginalPriceEn').value = b.originalPriceEn || '';
+      document.getElementById('bSaveEn').value = b.saveEn || '';
+      document.getElementById('bSaveAr').value = b.saveAr || '';
+      document.getElementById('bPersonsEn').value = b.personsEn || '';
+      document.getElementById('bPersonsAr').value = b.personsAr || '';
+      document.getElementById('bContentsEn').value = (b.contentsEn || []).join('\n');
+      document.getElementById('bContentsAr').value = (b.contentsAr || []).join('\n');
+      document.getElementById('bDescEn').value = b.descEn || '';
+      document.getElementById('bDescAr').value = b.descAr || '';
+      document.getElementById('bundleModal').classList.add('open');
+    }
+
+    function saveBundle() {
+      const nameEn = document.getElementById('bNameEn').value.trim();
+      if (!nameEn) { alert('Bundle name is required.'); return; }
+      pushUndo();
+      let b = editingBundleId
+        ? configData.ramadanBundles.find(x => x.id === editingBundleId)
+        : { id: 'bundle_' + Date.now(), active: true };
+      if (!editingBundleId) configData.ramadanBundles.push(b);
+      b.nameEn = nameEn;
+      b.nameAr = document.getElementById('bNameAr').value.trim();
+      b.badgeEn = document.getElementById('bBadgeEn').value.trim();
+      b.badgeAr = document.getElementById('bBadgeAr').value.trim();
+      b.badgeEmoji = document.getElementById('bBadgeEmoji').value.trim();
+      b.bundlePrice = parseFloat(document.getElementById('bPrice').value) || 0;
+      b.originalPriceEn = document.getElementById('bOriginalPriceEn').value.trim();
+      b.saveEn = document.getElementById('bSaveEn').value.trim();
+      b.saveAr = document.getElementById('bSaveAr').value.trim();
+      b.personsEn = document.getElementById('bPersonsEn').value.trim();
+      b.personsAr = document.getElementById('bPersonsAr').value.trim();
+      b.contentsEn = document.getElementById('bContentsEn').value.split('\n').map(x => x.trim()).filter(Boolean);
+      b.contentsAr = document.getElementById('bContentsAr').value.split('\n').map(x => x.trim()).filter(Boolean);
+      b.descEn = document.getElementById('bDescEn').value.trim();
+      b.descAr = document.getElementById('bDescAr').value.trim();
+      closeModal('bundleModal');
+      markDirty(); renderBundleList();
+      showToast((editingBundleId ? 'Bundle updated' : 'Bundle added') + '. Publish to go live!');
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  FAQ MANAGER
+    // ════════════════════════════════════════════════════════════════
+    function renderFaqList() {
+      if (!configData) return;
+      const items = [...(configData.faqItems || [])].sort((a, b) => (a.order || 0) - (b.order || 0));
+      let html = '';
+      items.forEach((f, idx) => {
+        html += `<div class="faq-admin-card ${f.active ? '' : 'hidden-faq'}">
+      <div class="faq-admin-header">
+        <div style="flex:1">
+          <div class="faq-admin-q">${f.questionEn}</div>
+          <div class="faq-admin-q-ar">${f.questionAr}</div>
+        </div>
+        <div class="faq-order-btns">
+          <button class="order-btn" onclick="moveFaq('${f.id}',-1)" title="Move up">▲</button>
+          <button class="order-btn" onclick="moveFaq('${f.id}',1)" title="Move down">▼</button>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-left:8px">
+          <label class="toggle" title="${f.active ? 'Visible' : 'Hidden'}">
+            <input type="checkbox" ${f.active ? 'checked' : ''} onchange="toggleFaqItem('${f.id}',this.checked)">
+            <span class="slider"></span>
+          </label>
+          <button class="btn btn-ghost btn-sm" onclick="openEditFaq('${f.id}')">✏️</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteFaq('${f.id}')">🗑</button>
+        </div>
+      </div>
+      <div style="font-size:.82rem;color:var(--tl);margin-top:8px;line-height:1.5;padding-top:8px;border-top:1px solid #f0f0f0">${f.answerEn.substring(0, 120)}${f.answerEn.length > 120 ? '…' : ''}</div>
+      <div style="font-size:.75rem;color:${f.active ? 'var(--green)' : 'var(--red)'};font-weight:700;margin-top:6px">${f.active ? '● Visible on site' : '○ Hidden from site'} · Order: ${f.order || idx + 1}</div>
+    </div>`;
+      });
+      document.getElementById('faqAdminList').innerHTML = html ||
+        '<div class="card" style="text-align:center;color:var(--tl);padding:30px">No FAQ items yet.</div>';
+    }
+
+    function toggleFaqItem(id, active) {
+      pushUndo();
+      const f = (configData.faqItems || []).find(x => x.id === id);
+      if (f) { f.active = active; markDirty(); renderFaqList(); renderStats(); }
+    }
+
+    function deleteFaq(id) {
+      const f = (configData.faqItems || []).find(x => x.id === id);
+      if (!f || !confirm('Delete this FAQ item?')) return;
+      pushUndo();
+      configData.faqItems = configData.faqItems.filter(x => x.id !== id);
+      markDirty(); renderFaqList(); renderStats();
+      showToast('FAQ item deleted. Publish to go live.');
+    }
+
+    function moveFaq(id, dir) {
+      const items = configData.faqItems || [];
+      const sorted = [...items].sort((a, b) => (a.order || 0) - (b.order || 0));
+      const idx = sorted.findIndex(x => x.id === id);
+      const newIdx = idx + dir;
+      if (newIdx < 0 || newIdx >= sorted.length) return;
+      pushUndo();
+      const tmp = sorted[idx].order;
+      sorted[idx].order = sorted[newIdx].order;
+      sorted[newIdx].order = tmp;
+      // Re-normalise orders
+      sorted.forEach((f, i) => { const item = items.find(x => x.id === f.id); if (item) item.order = i + 1; });
+      markDirty(); renderFaqList();
+    }
+
+    function openAddFaq() {
+      editingFaqId = null;
+      document.getElementById('faqModalTitle').textContent = 'Add FAQ Item';
+      ['fqQuestionEn', 'fqQuestionAr', 'fqAnswerEn', 'fqAnswerAr'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('faqModal').classList.add('open');
+    }
+
+    function openEditFaq(id) {
+      const f = (configData.faqItems || []).find(x => x.id === id);
+      if (!f) return;
+      editingFaqId = id;
+      document.getElementById('faqModalTitle').textContent = 'Edit FAQ Item';
+      document.getElementById('fqQuestionEn').value = f.questionEn;
+      document.getElementById('fqQuestionAr').value = f.questionAr;
+      document.getElementById('fqAnswerEn').value = f.answerEn;
+      document.getElementById('fqAnswerAr').value = f.answerAr;
+      document.getElementById('faqModal').classList.add('open');
+    }
+
+    function saveFaq() {
+      const qEn = document.getElementById('fqQuestionEn').value.trim();
+      const qAr = document.getElementById('fqQuestionAr').value.trim();
+      const aEn = document.getElementById('fqAnswerEn').value.trim();
+      const aAr = document.getElementById('fqAnswerAr').value.trim();
+      if (!qEn || !qAr || !aEn || !aAr) { alert('All four fields are required.'); return; }
+      pushUndo();
+      if (!configData.faqItems) configData.faqItems = [];
+      let f = editingFaqId
+        ? configData.faqItems.find(x => x.id === editingFaqId)
+        : { id: 'faq_' + Date.now(), active: true, order: (configData.faqItems.length + 1) };
+      if (!editingFaqId) configData.faqItems.push(f);
+      f.questionEn = qEn; f.questionAr = qAr; f.answerEn = aEn; f.answerAr = aAr;
+      closeModal('faqModal');
+      markDirty(); renderFaqList(); renderStats();
+      showToast((editingFaqId ? 'FAQ updated' : 'FAQ added') + '. Publish to go live!');
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  SECTION MANAGER
+    // ════════════════════════════════════════════════════════════════
+    function renderSectionList() {
+      if (!configData) return;
+      const sorted = [...(configData.sections || [])].sort((a, b) => (a.order || 0) - (b.order || 0));
+      let html = '';
+      sorted.forEach((s, idx) => {
+        const productCount = configData.products.filter(p => p.section === s.id).length;
+        html += `<div class="section-row">
+      <div class="faq-order-btns">
+        <button class="order-btn" onclick="moveSection('${s.id}',-1)">▲</button>
+        <button class="order-btn" onclick="moveSection('${s.id}',1)">▼</button>
+      </div>
+      <div class="section-row-labels">
+        <div class="section-row-en">${s.labelEn}</div>
+        <div class="section-row-ar">${s.labelAr}</div>
+      </div>
+      <span class="section-row-id">${s.id}</span>
+      <span style="font-size:.78rem;color:var(--tl)">${productCount} product${productCount !== 1 ? 's' : ''}</span>
+      <button class="btn btn-ghost btn-sm" onclick="openEditSection('${s.id}')">✏️ Edit</button>
+      <button class="btn btn-danger btn-sm" onclick="deleteSection('${s.id}')" ${productCount > 0 ? 'title="Will move products to Other"' : ''}>🗑</button>
+    </div>`;
+      });
+      document.getElementById('sectionList').innerHTML = html;
+    }
+
+    function moveSection(id, dir) {
+      const sorted = [...configData.sections].sort((a, b) => (a.order || 0) - (b.order || 0));
+      const idx = sorted.findIndex(x => x.id === id);
+      const ni = idx + dir;
+      if (ni < 0 || ni >= sorted.length) return;
+      pushUndo();
+      const tmp = sorted[idx].order; sorted[idx].order = sorted[ni].order; sorted[ni].order = tmp;
+      sorted.forEach((s, i) => { const item = configData.sections.find(x => x.id === s.id); if (item) item.order = i + 1; });
+      markDirty(); renderSectionList(); renderProductList();
+    }
+
+    function deleteSection(id) {
+      const s = configData.sections.find(x => x.id === id);
+      if (!s) return;
+      const count = configData.products.filter(p => p.section === id).length;
+      const msg = count > 0
+        ? `Delete section "${s.labelEn}"? Its ${count} product(s) will be moved to "Other." This cannot be undone.`
+        : `Delete section "${s.labelEn}"?`;
+      if (!confirm(msg)) return;
+      pushUndo();
+      configData.sections = configData.sections.filter(x => x.id !== id);
+      markDirty(); renderSectionList(); renderProductList(); populateSectionDropdown();
+      showToast('Section deleted. Publish to go live.');
+    }
+
+    function openAddSection() {
+      editingSectionId = null;
+      document.getElementById('sectionModalTitle').textContent = 'Add Section';
+      ['secLabelEn', 'secLabelAr', 'secId'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('secId').readOnly = false;
+      document.getElementById('secIdRow').style.display = 'block';
+      document.getElementById('sectionModal').classList.add('open');
+    }
+
+    function openEditSection(id) {
+      const s = configData.sections.find(x => x.id === id);
+      if (!s) return;
+      editingSectionId = id;
+      document.getElementById('sectionModalTitle').textContent = 'Edit Section';
+      document.getElementById('secLabelEn').value = s.labelEn;
+      document.getElementById('secLabelAr').value = s.labelAr;
+      document.getElementById('secId').value = s.id;
+      document.getElementById('secId').readOnly = true; // ID cannot change
+      document.getElementById('secIdRow').style.display = 'block';
+      document.getElementById('sectionModal').classList.add('open');
+    }
+
+    function saveSection() {
+      const labelEn = document.getElementById('secLabelEn').value.trim();
+      const labelAr = document.getElementById('secLabelAr').value.trim();
+      const secId = document.getElementById('secId').value.trim().toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
+      if (!labelEn || !labelAr) { alert('Both labels are required.'); return; }
+      if (!editingSectionId && !secId) { alert('Section ID is required.'); return; }
+      if (!editingSectionId && configData.sections.find(x => x.id === secId)) { alert('A section with that ID already exists.'); return; }
+      pushUndo();
+      if (editingSectionId) {
+        const s = configData.sections.find(x => x.id === editingSectionId);
+        s.labelEn = labelEn; s.labelAr = labelAr;
+      } else {
+        configData.sections.push({ id: secId, labelEn, labelAr, order: (configData.sections.length + 1) });
+      }
+      closeModal('sectionModal');
+      markDirty(); renderSectionList(); populateSectionDropdown();
+      showToast((editingSectionId ? 'Section updated' : 'Section added') + '. Publish to go live!');
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  META SETTINGS
+    // ════════════════════════════════════════════════════════════════
+    function populateMetaForm() {
+      if (!configData || !configData.meta) return;
+      const m = configData.meta;
+      document.getElementById('metaSiteName').value = m.siteName || '';
+      document.getElementById('metaSiteNameAr').value = m.siteNameAr || '';
+      document.getElementById('metaTagline').value = m.heroTagline || '';
+      document.getElementById('metaTaglineAr').value = m.heroTaglineAr || '';
+      document.getElementById('metaWhatsapp').value = m.whatsapp || '';
+      document.getElementById('metaDeliveryFee').value = m.deliveryFeeEGP || 75;
+      document.getElementById('metaDeliveryHours').value = m.deliveryHours || '';
+      document.getElementById('metaDeliveryHoursAr').value = m.deliveryHoursAr || '';
+      document.getElementById('metaRamadanVisible').checked = m.ramadanSectionVisible !== false;
+      document.getElementById('metaAppScriptURL').value = m.appScriptURL || '';
+    }
+
+    function saveMeta() {
+      pushUndo();
+      const m = configData.meta;
+      m.siteName = document.getElementById('metaSiteName').value.trim();
+      m.siteNameAr = document.getElementById('metaSiteNameAr').value.trim();
+      m.heroTagline = document.getElementById('metaTagline').value.trim();
+      m.heroTaglineAr = document.getElementById('metaTaglineAr').value.trim();
+      m.whatsapp = document.getElementById('metaWhatsapp').value.trim();
+      m.deliveryFeeEGP = parseFloat(document.getElementById('metaDeliveryFee').value) || 75;
+      m.deliveryHours = document.getElementById('metaDeliveryHours').value.trim();
+      m.deliveryHoursAr = document.getElementById('metaDeliveryHoursAr').value.trim();
+      m.ramadanSectionVisible = document.getElementById('metaRamadanVisible').checked;
+      m.appScriptURL = document.getElementById('metaAppScriptURL').value.trim();
+      markDirty(); renderStats();
+      showToast('Settings saved. Publish to go live!');
+    }
+
+    async function testAppScript() {
+      const url = document.getElementById('metaAppScriptURL').value.trim();
+      const res = document.getElementById('testResult');
+      if (!url) { res.textContent = '⚠️ Enter a URL first'; return; }
+      res.textContent = '⏳ Testing…';
+      try {
+        // Ping with a test=1 param; Apps Script should return 200
+        const r = await fetch(url + '?test=1', { method: 'GET', mode: 'no-cors' });
+        // no-cors always returns opaque — if it doesn't throw, the URL is reachable
+        res.innerHTML = '<span class="test-result ok">✅ URL reachable</span>';
+      } catch (e) {
+        res.innerHTML = '<span class="test-result fail">❌ Could not reach URL</span>';
+      }
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  NAV
+    // ════════════════════════════════════════════════════════════════
+    function showPanel(id) {
+      document.querySelectorAll('.panel-view').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      document.getElementById('panel-' + id).classList.add('active');
+      const nav = document.getElementById('nav-' + id);
+      if (nav) nav.classList.add('active');
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  MODAL HELPERS
+    // ════════════════════════════════════════════════════════════════
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('open');
+      editingProductId = null; editingBundleId = null; editingFaqId = null; editingSectionId = null;
+    }
+
+    // Close on overlay click
+    ['productModal', 'bundleModal', 'faqModal', 'sectionModal', 'previewModal'].forEach(id => {
+      document.getElementById(id)?.addEventListener('click', function (e) {
+        if (e.target === this) closeModal(id);
+      });
+    });
+
+    // ════════════════════════════════════════════════════════════════
+    //  TOAST
+    // ════════════════════════════════════════════════════════════════
+    function showToast(msg, isError = false) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = 'toast' + (isError ? ' error' : '') + ' show';
+      setTimeout(() => t.classList.remove('show'), 4500);
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  DEFAULT CONFIG
+    // ════════════════════════════════════════════════════════════════
+    function getDefaultConfig() {
+      return {
+        meta: {
+          siteName: 'Orgánica', siteNameAr: 'أورجانيكا', heroTagline: 'The Gold Standard of Organic Poultry',
+          heroTaglineAr: 'المعيار الذهبي للطيور الأورجانيك', whatsapp: '201067776664',
+          deliveryFeeEGP: 75, deliveryHours: '9 AM – 9 PM (All Week days)',
+          deliveryHoursAr: '٩ صباحاً – ٩ مساءً (طوال أيام الأسبوع)',
+          ramadanSectionVisible: true, appScriptURL: ''
+        },
+        products: [],
+        sections: [
+          { id: 'whole_poultry', labelEn: '🐔 Whole Poultry', labelAr: '🐔 دواجن كاملة', order: 1 },
+          { id: 'cuts', labelEn: '🍗 Cuts', labelAr: '🍗 قطعيات', order: 2 },
+          { id: 'processed', labelEn: '⚡ Processed', labelAr: '⚡ مصنعات', order: 3 },
+          { id: 'offal', labelEn: '🫀 Offal', labelAr: '🫀 كبدة', order: 4 }
+        ],
+        ramadanBundles: [],
+        faqItems: []
+      };
+    }
+  </script>
+</body>
+
+</html>
