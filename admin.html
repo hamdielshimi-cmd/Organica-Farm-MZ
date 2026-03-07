@@ -441,73 +441,107 @@
         }
 
         // --- Shared ---
-        function deleteItem(type, index) {
-            if (confirm('Are you sure you want to delete this item?')) {
-                state[type].splice(index, 1);
-                if (type === 'products') renderProducts();
-                if (type === 'bundles') renderBundles();
-                if (type === 'faq') renderFaq();
+<script>
+    // --- Your existing shared functions (deleteItem, showToast) stay here ---
+    function deleteItem(type, index) {
+        if (confirm('Are you sure?')) {
+            state[type].splice(index, 1);
+            // Re-render logic...
+            renderProducts(); // Assuming you have these render functions
+        }
+    }
+    
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz-QZvruLMplWfwJMgCWqgVkqbLA6tZm_mxalTmGAe8OxX-U-x_BJFU_0BTTsfWf40rEg/exec";
+    let currentConfig = {};
+
+    // 1. Load Data and Populate Form
+    async function loadAdminData() {
+      try {
+        const response = await fetch(SCRIPT_URL);
+        const data = await response.json();
+        currentConfig = data; // Store global data
+
+        // --- POPULATE FIELDS ---
+        // You must manually map the JSON fields to your HTML Input IDs
+        if(document.getElementById('siteName')) 
+            document.getElementById('siteName').value = data.meta.siteName;
+        
+        if(document.getElementById('whatsapp')) 
+            document.getElementById('whatsapp').value = data.meta.whatsapp;
+
+        // If you have a textarea for raw JSON editing (easiest method for complex data):
+        if(document.getElementById('jsonEditor')) {
+            document.getElementById('jsonEditor').value = JSON.stringify(data, null, 2);
+        }
+        
+        // If you built a specific UI for products, you need to loop through them here
+        // and create HTML rows for each product in currentConfig.products
+        
+        console.log("Config Loaded");
+      } catch (error) {
+        console.error("Error loading config:", error);
+        alert("Failed to load data from Google Sheet.");
+      }
+    }
+
+    // 2. Save Data
+    async function saveData() {
+        const btn = document.getElementById('saveButton');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = 'Saving...';
+        btn.disabled = true;
+
+        // --- GATHER DATA ---
+        // Update the global object with values from inputs
+        currentConfig.meta.siteName = document.getElementById('siteName').value;
+        currentConfig.meta.whatsapp = document.getElementById('whatsapp').value;
+        // ... update other meta fields ...
+
+        // IMPORTANT: If you are editing products in the UI, 
+        // you must update currentConfig.products here with the new array.
+        
+        // ALTERNATIVE: If you use a Textarea for JSON:
+        if(document.getElementById('jsonEditor')) {
+            try {
+                currentConfig = JSON.parse(document.getElementById('jsonEditor').value);
+            } catch(e) {
+                alert("Invalid JSON format in editor");
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                return;
             }
         }
 
-        function showToast(msg, type = 'success') {
-            const toast = document.getElementById('toast');
-            toast.textContent = msg;
-            toast.className = type === 'success' ? 'success show' : 'error show';
-            setTimeout(() => { toast.classList.remove('show'); }, 3000);
+        // Send to Google Script
+        try {
+            const response = await fetch(SCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify(currentConfig) // Send the WHOLE updated object
+            });
+            
+            const result = await response.json();
+            if(result.result === "success") {
+                alert("Saved successfully! Live site updated.");
+            } else {
+                alert("Error: " + result.error);
+            }
+        } catch (error) {
+            console.error("Error saving:", error);
+            alert("Network error. Could not save.");
+        } finally {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
         }
-
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz-QZvruLMplWfwJMgCWqgVkqbLA6tZm_mxalTmGAe8OxX-U-x_BJFU_0BTTsfWf40rEg/exec";
-let currentConfig = {};
-
-// 1. Load current data into the admin form
-async function loadAdminData() {
-  const response = await fetch(SCRIPT_URL);
-  currentConfig = await response.json();
-  
-  // Logic to populate your HTML inputs with currentConfig values
-  // Example: document.getElementById('siteName').value = currentConfig.meta.siteName;
-}
-
-// 2. Save Data function
-async function saveData() {
-  // Gather all data from your HTML inputs back into a JSON object
-  // This is a simplified example:
-  const updatedConfig = {
-    meta: {
-        siteName: document.getElementById('siteName').value,
-        // ... map all other fields
-    },
-    products: currentConfig.products, // Assuming you have logic to edit this array too
-    sections: currentConfig.sections,
-    // ... include the rest of the structure
-  };
-
-  // Send to Google Script via POST
-  try {
-    const response = await fetch(SCRIPT_URL, {
-      method: 'POST',
-      body: JSON.stringify(updatedConfig)
-    });
-    
-    const result = await response.json();
-    if(result.result === "success") {
-      alert("Saved successfully! The live site is updated.");
-    } else {
-      alert("Error: " + result.error);
     }
-  } catch (error) {
-    console.error("Error saving:", error);
-  }
-}
 
-// Load data on start
-loadAdminData();
-
-// Bind save button
-document.getElementById('saveButton').addEventListener('click', saveData);
+    // Initialize on load
+    document.addEventListener('DOMContentLoaded', () => {
+        loadAdminData();
+        document.getElementById('saveButton').addEventListener('click', saveData);
+    });
     </script>
 </body>
 </html>
+
 
 
