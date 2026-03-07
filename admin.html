@@ -197,13 +197,13 @@
     <div id="toast">Message here</div>
     <div class="loader-overlay" id="loader"><div class="spinner"></div></div>
 
-     <script>
+  <script>
     // ──────────────────────────────────────────────────────────────
     // CONFIGURATION
     // ──────────────────────────────────────────────────────────────
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz-QZvruLMplWfwJMgCWqgVkqbLA6tZm_mxalTmGAe8OxX-U-x_BJFU_0BTTsfWf40rEg/exec";
     
-    // This is the "Working State" that your UI edits
+    // Main Data Store
     let state = {
       meta: {},
       products: [],
@@ -213,132 +213,53 @@
     };
 
     // ──────────────────────────────────────────────────────────────
-    // UTILITIES
+    // INITIALIZATION
     // ──────────────────────────────────────────────────────────────
-    
-    function showToast(msg, type = 'success') {
-      // Create toast element if it doesn't exist
-      let toast = document.getElementById('toast');
-      if (!toast) {
-        toast = document.createElement('div');
-        toast.id = 'toast';
-        toast.style.cssText = `
-          position: fixed; bottom: 20px; right: 20px;
-          padding: 15px 25px; border-radius: 8px; color: white;
-          font-weight: bold; z-index: 9999; transition: all 0.3s;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: none;
-        `;
-        document.body.appendChild(toast);
-      }
-
-      toast.textContent = msg;
-      toast.className = type === 'success' ? 'success show' : 'error show';
+    document.addEventListener('DOMContentLoaded', async () => {
+      await loadAdminData();
       
-      // Simple inline styles for colors if class doesn't work
-      toast.style.backgroundColor = type === 'success' ? '#4A6741' : '#D47A2C';
-      toast.style.display = 'block';
-
-      setTimeout(() => { 
-        toast.style.display = 'none'; 
-      }, 3000);
-    }
-
-    function showLoader(isLoading) {
-      const btn = document.getElementById('saveButton');
-      if(btn) {
-        btn.disabled = isLoading;
-        btn.innerHTML = isLoading ? '<i class="fas fa-spinner fa-spin"></i> Saving...' : '<i class="fas fa-save"></i> Save Changes';
-      }
-    }
+      // Allow changing URL dynamically if needed via the header input
+      const urlInput = document.getElementById('apiUrl');
+      if(urlInput && !urlInput.value) urlInput.value = SCRIPT_URL;
+    });
 
     // ──────────────────────────────────────────────────────────────
-    // DATA MANAGEMENT (LOAD & SAVE)
+    // DATA LOADING & SAVING
     // ──────────────────────────────────────────────────────────────
 
-    // 1. Load Data from Google Sheet
     async function loadAdminData() {
       try {
-        console.log("Fetching config...");
+        showLoader(true);
         const response = await fetch(SCRIPT_URL);
         const data = await response.json();
+        state = data;
         
-        // Update our local state with fresh data
-        state = data; 
-
-        // --- POPULATE UI ---
+        // Render all tables
+        renderProductsTable();
+        renderBundlesTable();
+        renderFaqTable();
         
-        // A. If you have a "Raw JSON Editor" Textarea, fill it
-        const jsonEditor = document.getElementById('jsonEditor');
-        if (jsonEditor) {
-          jsonEditor.value = JSON.stringify(state, null, 2);
-        }
-
-        // B. If you have specific Input Fields (e.g. Meta Data), fill them
-        // We use try-catch blocks here so the script doesn't crash if an ID doesn't exist on your page
-        try {
-          if(document.getElementById('siteName')) document.getElementById('siteName').value = state.meta.siteName || '';
-          if(document.getElementById('whatsapp')) document.getElementById('whatsapp').value = state.meta.whatsapp || '';
-          if(document.getElementById('heroTagline')) document.getElementById('heroTagline').value = state.meta.heroTagline || '';
-          // Add other input mappings here as needed...
-        } catch (err) {
-          console.warn("Some inputs might be missing:", err);
-        }
-
-        // C. If you have custom render functions for tables/lists, call them
-        // Example: if (typeof renderProducts === 'function') renderProducts();
-        // Example: if (typeof renderFaq === 'function') renderFaq();
-        
-        console.log("Config loaded successfully.");
         showToast("Configuration loaded", "success");
-
       } catch (error) {
         console.error("Error loading config:", error);
-        showToast("Failed to load data from Sheet", "error");
+        showToast("Failed to load data", "error");
+      } finally {
+        showLoader(false);
       }
     }
 
-    // 2. Save Data to Google Sheet
     async function saveData() {
       showLoader(true);
-
-      // --- GATHER DATA FROM UI ---
-      
-      // A. Update state from the JSON Editor (Primary Source if it exists)
-      const jsonEditor = document.getElementById('jsonEditor');
-      if (jsonEditor && jsonEditor.value.trim() !== "") {
-        try {
-          const parsedEditor = JSON.parse(jsonEditor.value);
-          state = parsedEditor; // Overwrite state with what's in the editor
-        } catch (e) {
-          showToast("Invalid JSON in the editor! Please fix syntax errors.", "error");
-          showLoader(false);
-          return;
-        }
-      } else {
-        // B. If no editor, gather from individual inputs
-        try {
-          state.meta.siteName = document.getElementById('siteName')?.value || state.meta.siteName;
-          state.meta.whatsapp = document.getElementById('whatsapp')?.value || state.meta.whatsapp;
-          // ... gather other fields ...
-          
-          // NOTE: If you are using 'deleteItem', that function modifies 'state' directly,
-          // so products/bundles/faq are already up to date in memory.
-        } catch (err) {
-          console.warn("Could not update state from inputs:", err);
-        }
-      }
-
-      // --- SEND TO GOOGLE SCRIPT ---
       try {
+        // We send the entire 'state' object which has been updated by table inputs
         const response = await fetch(SCRIPT_URL, {
           method: 'POST',
-          body: JSON.stringify(state) // Send the entire state object
+          body: JSON.stringify(state)
         });
-
+        
         const result = await response.json();
-
         if (result.result === "success") {
-          showToast("Saved successfully! Live site updated.", "success");
+          showToast("Saved successfully!", "success");
         } else {
           throw new Error(result.message || result.error || "Unknown Error");
         }
@@ -350,46 +271,212 @@
       }
     }
 
-    // ──────────────────────────────────────────────────────────────
-    // ACTIONS (Delete, Add, etc.)
-    // ──────────────────────────────────────────────────────────────
-
-    function deleteItem(type, index) {
-      // Type should match the key in 'state', e.g., 'products', 'faqItems'
-      if (confirm('Are you sure you want to delete this item?')) {
-        if (state[type] && Array.isArray(state[type])) {
-          state[type].splice(index, 1);
-          
-          // If you are using a JSON editor, update it immediately so the user sees the change
-          const jsonEditor = document.getElementById('jsonEditor');
-          if (jsonEditor) {
-            jsonEditor.value = JSON.stringify(state, null, 2);
-          }
-
-          // If you have a render function, call it to remove the row from the table
-          // if (type === 'products' && typeof renderProducts === 'function') renderProducts();
-          
-          showToast("Item deleted (Save to confirm)", "success");
-        }
+    // Wrappers for the specific Save buttons in HTML
+    function saveProducts() { saveData(); }
+    function saveBundles() { saveData(); }
+    function saveFaq() { saveData(); }
+    function saveConfig() { 
+      const url = document.getElementById('apiUrl').value;
+      if(url) {
+          // In a real app, you might save this to localStorage
+          window.location.href = url; // Just for testing connection
       }
     }
 
     // ──────────────────────────────────────────────────────────────
-    // INITIALIZATION
+    // TABS
     // ──────────────────────────────────────────────────────────────
-    document.addEventListener('DOMContentLoaded', () => {
-      // Load data immediately
-      loadAdminData();
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      
+      // Find button by onclick text content is tricky, simpler to rely on order or specific ID logic
+      // But based on your HTML, we just toggle classes
+      const btns = document.querySelectorAll('.tab-btn');
+      if(tabId === 'products') btns[0].classList.add('active');
+      if(tabId === 'bundles') btns[1].classList.add('active');
+      if(tabId === 'faq') btns[2].classList.add('active');
 
-      // Attach Save Button
-      const saveBtn = document.getElementById('saveButton');
-      if (saveBtn) {
-        saveBtn.addEventListener('click', saveData);
-      } else {
-        console.warn("Save button with ID 'saveButton' not found.");
+      document.getElementById(tabId).classList.add('active');
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // PRODUCTS TABLE LOGIC
+    // ──────────────────────────────────────────────────────────────
+    function renderProductsTable() {
+      const tbody = document.querySelector('#productsTable tbody');
+      tbody.innerHTML = '';
+      
+      state.products.forEach((p, index) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><input type="text" value="${p.id || ''}" oninput="updateState('products', ${index}, 'id', this.value)" placeholder="prod_id"></td>
+          <td>
+            <select onchange="updateState('products', ${index}, 'section', this.value)">
+              <option value="whole_poultry" ${p.section === 'whole_poultry' ? 'selected' : ''}>Whole Poultry</option>
+              <option value="cuts" ${p.section === 'cuts' ? 'selected' : ''}>Cuts</option>
+              <option value="processed" ${p.section === 'processed' ? 'selected' : ''}>Processed</option>
+              <option value="offal" ${p.section === 'offal' ? 'selected' : ''}>Offal</option>
+            </select>
+          </td>
+          <td><input type="text" value="${p.nameEn || ''}" oninput="updateState('products', ${index}, 'nameEn', this.value)"></td>
+          <td><input type="text" value="${p.nameAr || ''}" oninput="updateState('products', ${index}, 'nameAr', this.value)"></td>
+          <td>
+             <select onchange="updateState('products', ${index}, 'pricingType', this.value)">
+                <option value="fixed" ${p.pricingType === 'fixed' ? 'selected' : ''}>Fixed Price</option>
+                <option value="variable_weight" ${p.pricingType === 'variable_weight' ? 'selected' : ''}>Variable Weight</option>
+             </select>
+          </td>
+          <td>
+            <input type="number" value="${p.pricePerKg || p.fixedPrice || ''}" 
+                   oninput="updateState('products', ${index}, '${p.pricingType === 'variable_weight' ? 'pricePerKg' : 'fixedPrice'}', this.value)">
+          </td>
+          <td><input type="text" value="${p.fixedUnit || ''}" oninput="updateState('products', ${index}, 'fixedUnit', this.value)" placeholder="kg/pair"></td>
+          <td class="col-check"><input type="checkbox" ${p.active !== false ? 'checked' : ''} onchange="updateState('products', ${index}, 'active', this.checked)"></td>
+          <td class="col-actions">
+            <button class="icon-btn delete" onclick="deleteItem('products', ${index})"><i class="fas fa-trash"></i></button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function addProduct() {
+      state.products.push({
+        id: 'new_prod_' + Date.now(),
+        section: 'whole_poultry',
+        nameEn: 'New Product',
+        nameAr: 'منتج جديد',
+        pricingType: 'fixed',
+        fixedPrice: 0,
+        active: true
+      });
+      renderProductsTable();
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // BUNDLES TABLE LOGIC
+    // ──────────────────────────────────────────────────────────────
+    function renderBundlesTable() {
+      const tbody = document.querySelector('#bundlesTable tbody');
+      tbody.innerHTML = '';
+
+      state.ramadanBundles.forEach((b, index) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><input type="text" value="${b.id || ''}" oninput="updateState('ramadanBundles', ${index}, 'id', this.value)"></td>
+          <td>
+             <input type="text" value="${b.nameEn || ''}" placeholder="Name EN" oninput="updateState('ramadanBundles', ${index}, 'nameEn', this.value)">
+             <input type="text" value="${b.nameAr || ''}" placeholder="Name AR" oninput="updateState('ramadanBundles', ${index}, 'nameAr', this.value)" style="margin-top:4px">
+          </td>
+          <td>
+             <input type="text" value="${b.badgeEn || ''}" placeholder="Badge EN" oninput="updateState('ramadanBundles', ${index}, 'badgeEn', this.value)">
+             <input type="text" value="${b.badgeAr || ''}" placeholder="Badge AR" oninput="updateState('ramadanBundles', ${index}, 'badgeAr', this.value)" style="margin-top:4px">
+          </td>
+          <td><input type="number" value="${b.bundlePrice || ''}" oninput="updateState('ramadanBundles', ${index}, 'bundlePrice', this.value)"></td>
+          <td><textarea oninput="updateState('ramadanBundles', ${index}, 'contentsEn', this.value)">${(b.contentsEn || []).join(', ')}</textarea></td>
+          <td><textarea oninput="updateState('ramadanBundles', ${index}, 'descEn', this.value)">${b.descEn || ''}</textarea></td>
+          <td class="col-check"><input type="checkbox" ${b.active !== false ? 'checked' : ''} onchange="updateState('ramadanBundles', ${index}, 'active', this.checked)"></td>
+          <td class="col-actions">
+            <button class="icon-btn delete" onclick="deleteItem('ramadanBundles', ${index})"><i class="fas fa-trash"></i></button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function addBundle() {
+      state.ramadanBundles.push({
+        id: 'new_bundle_' + Date.now(),
+        nameEn: 'New Bundle',
+        nameAr: 'باقة جديدة',
+        bundlePrice: 0,
+        active: true
+      });
+      renderBundlesTable();
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // FAQ TABLE LOGIC
+    // ──────────────────────────────────────────────────────────────
+    function renderFaqTable() {
+      const tbody = document.querySelector('#faqTable tbody');
+      tbody.innerHTML = '';
+
+      state.faqItems.forEach((f, index) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><input type="text" value="${f.id || ''}" oninput="updateState('faqItems', ${index}, 'id', this.value)"></td>
+          <td><textarea oninput="updateState('faqItems', ${index}, 'questionEn', this.value)">${f.questionEn || ''}</textarea></td>
+          <td><textarea oninput="updateState('faqItems', ${index}, 'questionAr', this.value)">${f.questionAr || ''}</textarea></td>
+          <td><textarea oninput="updateState('faqItems', ${index}, 'answerEn', this.value)">${f.answerEn || ''}</textarea></td>
+          <td><textarea oninput="updateState('faqItems', ${index}, 'answerAr', this.value)">${f.answerAr || ''}</textarea></td>
+          <td class="col-check"><input type="checkbox" ${f.active !== false ? 'checked' : ''} onchange="updateState('faqItems', ${index}, 'active', this.checked)"></td>
+          <td class="col-actions">
+            <button class="icon-btn delete" onclick="deleteItem('faqItems', ${index})"><i class="fas fa-trash"></i></button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function addFaq() {
+      state.faqItems.push({
+        id: 'new_faq_' + Date.now(),
+        questionEn: 'New Question',
+        answerEn: 'New Answer',
+        active: true
+      });
+      renderFaqTable();
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // SHARED HELPERS
+    // ──────────────────────────────────────────────────────────────
+    
+    // Updates the specific field in the state array
+    function updateState(type, index, field, value) {
+      if (state[type] && state[type][index]) {
+        // Handle number conversion for prices
+        if (field === 'pricePerKg' || field === 'fixedPrice' || field === 'bundlePrice') {
+          state[type][index][field] = parseFloat(value) || 0;
+        } else if (field === 'active') {
+          state[type][index][field] = value;
+        } else if (field === 'contentsEn') {
+             // Simple split by comma for array, or keep as string if complex
+             // Assuming user types comma separated for array in table
+             state[type][index][field] = value.split(',').map(s => s.trim());
+        } else {
+          state[type][index][field] = value;
+        }
       }
-    });
+    }
+
+    function deleteItem(type, index) {
+      if (confirm('Are you sure you want to delete this item?')) {
+        state[type].splice(index, 1);
+        // Re-render the current active table
+        if(type === 'products') renderProductsTable();
+        if(type === 'ramadanBundles') renderBundlesTable();
+        if(type === 'faqItems') renderFaqTable();
+        showToast("Item deleted (Save to confirm)", "success");
+      }
+    }
+
+    function showToast(msg, type = 'success') {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.className = type === 'success' ? 'success show' : 'error show';
+      setTimeout(() => { toast.classList.remove('show'); }, 3000);
+    }
+
+    function showLoader(isLoading) {
+      const loader = document.getElementById('loader');
+      if (loader) {
+        if (isLoading) loader.classList.add('active');
+        else loader.classList.remove('active');
+      }
+    }
   </script>
 </body>
 </html>
-
