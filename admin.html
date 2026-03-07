@@ -1,496 +1,461 @@
-// ═══════════════════════════════════════════════════════════════════
-//  🌿 ORGANICA FARM — Google Apps Script
-//  ─────────────────────────────────────────────────────────────────
-//  STEP 1: Paste this entire file into your Apps Script editor
-//  STEP 2: Replace YOUR_SPREADSHEET_ID_HERE with your Sheet ID
-//  STEP 3: Run setupSheets() ONCE to build all headers + pre-fill data
-//  STEP 4: Deploy as Web App → Anyone → Copy the URL into admin.html
-// ═══════════════════════════════════════════════════════════════════
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orgánica Admin Panel</title>
+    <style>
+        :root {
+            --primary: #4A6741;
+            --primary-dark: #364e2f;
+            --accent: #D47A2C;
+            --bg: #f4f6f3;
+            --white: #ffffff;
+            --border: #e0e0e0;
+            --text: #333333;
+            --text-light: #666666;
+        }
 
-// ── ⚠️  FILL THIS IN ────────────────────────────────────────────────
-const SS_ID = '1TeuEWand9BAB8VvBlW6hfO-SodIbzxrzDBwFKozeAh8';
-// Your Sheet ID is the long string in the URL:
-// https://docs.google.com/spreadsheets/d/ >>>THIS PART<<< /edit
+        * { box-sizing: border-box; outline: none; }
+        body { margin: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); padding-bottom: 40px; }
+        
+        /* --- Header --- */
+        header { background: var(--primary); color: var(--white); padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
+        h1 { margin: 0; font-size: 1.5rem; display: flex; align-items: center; gap: 10px; }
+        .config-bar { display: flex; gap: 10px; align-items: center; background: rgba(0,0,0,0.2); padding: 8px 15px; border-radius: 8px; }
+        .config-bar input { padding: 8px 12px; border-radius: 4px; border: none; width: 300px; font-size: 0.9rem; }
+        .config-bar button { background: var(--accent); color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .config-bar button:hover { background: #b86622; }
 
-// ── NOTIFICATION EMAILS ─────────────────────────────────────────────
-const NOTIFICATION_EMAILS = [
-  'hamdielshimi@gmail.com',
-  'zeina.daabiss@gmail.com',
-  'Mokhaled82@gmail.com'
-];
+        /* --- Navigation --- */
+        nav { display: flex; gap: 20px; padding: 20px 40px; border-bottom: 1px solid var(--border); background: var(--white); overflow-x: auto; }
+        .tab-btn { background: none; border: none; font-size: 1rem; color: var(--text-light); cursor: pointer; padding-bottom: 5px; border-bottom: 3px solid transparent; transition: all 0.2s; white-space: nowrap; }
+        .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 600; }
 
-// ── SITE META (edit here or in Site Settings in admin panel) ────────
-const META = {
-  siteName:              'Orgánica',
-  siteNameAr:            'أورجانيكا',
-  heroTagline:           'The Gold Standard of Organic Poultry',
-  heroTaglineAr:         'المعيار الذهبي للطيور الأورجانيك',
-  whatsapp:              '201067776664',
-  deliveryFeeEGP:        75,
-  deliveryHours:         '9 AM – 9 PM (All Week days)',
-  deliveryHoursAr:       '٩ صباحاً – ٩ مساءً (طوال أيام الأسبوع)',
-  ramadanSectionVisible: true,
-  appScriptURL:          '' // Auto-filled after first deploy
-};
+        /* --- Main Content --- */
+        main { padding: 40px; max-width: 1400px; margin: 0 auto; }
+        .section { display: none; animation: fadeIn 0.3s ease; }
+        .section.active { display: block; }
 
+        /* --- Toolbars --- */
+        .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .btn { padding: 10px 20px; border-radius: 6px; border: none; cursor: pointer; font-weight: 500; display: inline-flex; align-items: center; gap: 8px; transition: 0.2s; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-secondary { background: white; border: 1px solid var(--border); color: var(--text); }
+        .btn-secondary:hover { background: #f9f9f9; border-color: #ccc; }
 
-// ═══════════════════════════════════════════════════════════════════
-//  MAIN HANDLER
-// ═══════════════════════════════════════════════════════════════════
-function doGet(e) {
-  if (!e || !e.parameter) {
-    return jsonResponse({ status: 'ok', service: 'Organica App Script', version: '2.0', note: 'No parameters — open via /exec URL to test' });
-  }
+        /* --- Tables --- */
+        .table-container { background: var(--white); border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); overflow: hidden; border: 1px solid var(--border); }
+        table { width: 100%; border-collapse: collapse; min-width: 800px; }
+        th { background: #f8f9fa; text-align: left; padding: 12px 16px; font-weight: 600; color: var(--text-light); font-size: 0.85rem; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+        td { padding: 12px 16px; border-bottom: 1px solid var(--border); vertical-align: top; }
+        tr:last-child td { border-bottom: none; }
+        
+        /* --- Inputs in Table --- */
+        input[type="text"], input[type="number"], select, textarea {
+            width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 0.9rem; font-family: inherit; transition: 0.2s;
+        }
+        input:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(74, 103, 65, 0.1); }
+        textarea { resize: vertical; min-height: 60px; line-height: 1.4; }
+        
+        /* --- Utilities --- */
+        .row-actions { display: flex; gap: 8px; justify-content: flex-end; }
+        .icon-btn { background: none; border: none; cursor: pointer; color: var(--text-light); font-size: 1.1rem; }
+        .icon-btn:hover { color: var(--accent); }
+        .icon-btn.delete:hover { color: #d32f2f; }
 
-  const action = e.parameter.action || '';
+        /* --- Toast --- */
+        #toast { position: fixed; bottom: 30px; right: 30px; background: #333; color: white; padding: 12px 24px; border-radius: 8px; opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 1000; display: flex; align-items: center; gap: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+        #toast.show { opacity: 1; }
+        #toast.success { background: var(--primary); }
+        #toast.error { background: #d32f2f; }
 
-  if (action === 'getConfig') {
-    return jsonResponse(buildConfig());
-  }
+        /* --- Loader --- */
+        .loader-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); display: flex; justify-content: center; align-items: center; z-index: 999; backdrop-filter: blur(2px); visibility: hidden; opacity: 0; transition: 0.2s; }
+        .loader-overlay.active { visibility: visible; opacity: 1; }
+        .spinner { width: 40px; height: 40px; border: 4px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
 
-  if (e.parameter.name || e.parameter.phone) {
-    return recordOrder(e.parameter);
-  }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-  return jsonResponse({ status: 'ok', service: 'Organica App Script', version: '2.0' });
-}
+        /* --- Specific Column Widths --- */
+        .col-id { width: 150px; }
+        .col-price { width: 100px; }
+        .col-check { width: 80px; text-align: center; }
+        .col-actions { width: 80px; text-align: right; }
+    </style>
+</head>
+<body>
 
-function doPost(e) {
-  const action = e.parameter.action || '';
-
-  // ── Admin API Endpoints ────────────────────────────────────────
-  if (action === 'saveProducts') {
-    return saveProducts(e.parameter.data);
-  }
-  if (action === 'saveBundles') {
-    return saveBundles(e.parameter.data);
-  }
-  if (action === 'saveFaq') {
-    return saveFaq(e.parameter.data);
-  }
-
-  // ── Default: Record Order ───────────────────────────────────────
-  return recordOrder(e.parameter);
-}
-
-
-// ═══════════════════════════════════════════════════════════════════
-//  CONFIG BUILDER
-// ═══════════════════════════════════════════════════════════════════
-function buildConfig() {
-  try {
-    const ss = SpreadsheetApp.openById(SS_ID);
-    const config = {
-      meta:          META,
-      sections:      readSections(ss),
-      products:      readProducts(ss),
-      ramadanBundles: readBundles(ss),
-      faqItems:      readFaqs(ss)
-    };
-    return config;
-  } catch (err) {
-    return { error: 'buildConfig failed: ' + err.toString() };
-  }
-}
-
-
-// ═══════════════════════════════════════════════════════════════════
-//  READ FUNCTIONS
-// ═══════════════════════════════════════════════════════════════════
-function readSections(ss) {
-  const sheet = ss.getSheetByName('pricelist');
-  if (!sheet) return [];
-  const data  = sheet.getDataRange().getValues();
-  const out   = [];
-  let inBlock = false;
-
-  for (let i = 0; i < data.length; i++) {
-    const first = String(data[i][0]).trim();
-    if (first === '===SECTIONS===') { inBlock = true; continue; }
-    if (first === '===PRODUCTS===') break;
-    if (!inBlock || first === 'ID' || first === '') continue;
-    if (!data[i][0]) continue;
-
-    out.push({
-      id:      String(data[i][0]).trim(),
-      labelEn: String(data[i][1] || '').trim(),
-      labelAr: String(data[i][2] || '').trim(),
-      order:   parseInt(data[i][3]) || out.length + 1
-    });
-  }
-  return out;
-}
-
-function readProducts(ss) {
-  const sheet = ss.getSheetByName('pricelist');
-  if (!sheet) return [];
-  const data  = sheet.getDataRange().getValues();
-  const out   = [];
-  let inBlock = false;
-
-  for (let i = 0; i < data.length; i++) {
-    const first = String(data[i][0]).trim();
-    if (first === '===PRODUCTS===') { inBlock = true; continue; }
-    if (!inBlock) continue;
-    if (first === 'ID' || first === '') continue;
-    if (!data[i][0]) continue;
-
-    const type = String(data[i][4] || 'fixed').trim();
-    const active = !(data[i][12] === false || String(data[i][12]).toUpperCase() === 'FALSE' || data[i][12] === 0);
-
-    const p = {
-      id:          String(data[i][0]).trim(),
-      section:     String(data[i][1] || '').trim(),
-      nameEn:      String(data[i][2] || '').trim(),
-      nameAr:      String(data[i][3] || '').trim(),
-      pricingType: type,
-      active:      active
-    };
-
-    if (type === 'variable_weight') {
-      p.pricePerKg    = parseFloat(data[i][5]) || 0;
-      p.defaultWeightG = parseInt(data[i][9])  || 1200;
-      p.minWeightG    = parseInt(data[i][10])  || 800;
-      p.maxWeightG    = parseInt(data[i][11])  || 2500;
-    } else {
-      p.fixedPrice  = parseFloat(data[i][6])        || 0;
-      p.fixedUnit   = String(data[i][7] || 'kg').trim();
-      p.fixedUnitAr = String(data[i][8] || 'كجم').trim();
-    }
-
-    out.push(p);
-  }
-  return out;
-}
-
-function readBundles(ss) {
-  const sheet = ss.getSheetByName('boundles');
-  if (!sheet) return [];
-  const data = sheet.getDataRange().getValues();
-  const out  = [];
-
-  for (let i = 1; i < data.length; i++) {
-    if (!data[i][0]) continue;
-    const active = !(data[i][16] === false || String(data[i][16]).toUpperCase() === 'FALSE' || data[i][16] === 0);
-
-    out.push({
-      id:             String(data[i][0]).trim(),
-      nameEn:         String(data[i][1]  || '').trim(),
-      nameAr:         String(data[i][2]  || '').trim(),
-      badgeEn:        String(data[i][3]  || '').trim(),
-      badgeAr:        String(data[i][4]  || '').trim(),
-      badgeEmoji:     String(data[i][5]  || '').trim(),
-      bundlePrice:    parseFloat(data[i][6]) || 0,
-      originalPriceEn: String(data[i][7] || '').trim(),
-      saveEn:         String(data[i][8]  || '').trim(),
-      saveAr:         String(data[i][9]  || '').trim(),
-      personsEn:      String(data[i][10] || '').trim(),
-      personsAr:      String(data[i][11] || '').trim(),
-      contentsEn:     String(data[i][12] || '').split('\n').map(s => s.trim()).filter(Boolean),
-      contentsAr:     String(data[i][13] || '').split('\n').map(s => s.trim()).filter(Boolean),
-      descEn:         String(data[i][14] || '').trim(),
-      descAr:         String(data[i][15] || '').trim(),
-      active:         active
-    });
-  }
-  return out;
-}
-
-function readFaqs(ss) {
-  const sheet = ss.getSheetByName('q&a');
-  if (!sheet) return [];
-  const data = sheet.getDataRange().getValues();
-  const out  = [];
-
-  for (let i = 1; i < data.length; i++) {
-    if (!data[i][0]) continue;
-    const active = !(data[i][5] === false || String(data[i][5]).toUpperCase() === 'FALSE' || data[i][5] === 0);
-
-    out.push({
-      id:         String(data[i][0]).trim(),
-      questionEn: String(data[i][1] || '').trim(),
-      questionAr: String(data[i][2] || '').trim(),
-      answerEn:   String(data[i][3] || '').trim(),
-      answerAr:   String(data[i][4] || '').trim(),
-      active:     active,
-      order:      parseInt(data[i][6]) || i
-    });
-  }
-  return out;
-}
-
-
-// ═══════════════════════════════════════════════════════════════════
-//  ADMIN SAVE FUNCTIONS
-// ═══════════════════════════════════════════════════════════════════
-function saveProducts(data) {
-  const ss = SpreadsheetApp.openById(SS_ID);
-  const sheet = ss.getSheetByName('pricelist');
-  const products = JSON.parse(data);
-  const startRow = 10; // Row where products start in setupSheets
-
-  const rows = products.map(p => [
-    p.id,
-    p.section,
-    p.nameEn,
-    p.nameAr,
-    p.pricingType,
-    p.pricePerKg || '',
-    p.fixedPrice || '',
-    p.fixedUnit || '',
-    p.fixedUnitAr || '',
-    p.defaultWeightG || '',
-    p.minWeightG || '',
-    p.maxWeightG || '',
-    true // Active
-  ]);
-
-  // Clear old data range (from startRow to end of sheet)
-  const lastRow = Math.max(startRow, sheet.getLastRow());
-  if (lastRow >= startRow) {
-    sheet.getRange(startRow, 1, lastRow - startRow + 1, 13).clearContent();
-  }
-
-  // Write new data
-  if (rows.length > 0) {
-    sheet.getRange(startRow, 1, rows.length, 13).setValues(rows);
-  }
-
-  return jsonResponse({ status: 'success' });
-}
-
-function saveBundles(data) {
-  const ss = SpreadsheetApp.openById(SS_ID);
-  const sheet = ss.getSheetByName('boundles');
-  const bundles = JSON.parse(data);
-
-  const rows = bundles.map(b => [
-    b.id,
-    b.nameEn,
-    b.nameAr,
-    b.badgeEn,
-    b.badgeAr,
-    b.badgeEmoji,
-    b.bundlePrice,
-    b.originalPriceEn,
-    b.saveEn,
-    b.saveAr,
-    b.personsEn,
-    b.personsAr,
-    b.contentsEn.join("\n"),
-    b.contentsAr.join("\n"),
-    b.descEn,
-    b.descAr,
-    b.active
-  ]);
-
-  // Clear existing data (keep header)
-  const lastRow = Math.max(2, sheet.getLastRow());
-  if (lastRow >= 2) {
-    sheet.getRange(2, 1, lastRow - 1, 17).clearContent();
-  }
-
-  if (rows.length > 0) {
-    sheet.getRange(2, 1, rows.length, 17).setValues(rows);
-  }
-
-  return jsonResponse({ status: 'success' });
-}
-
-function saveFaq(data) {
-  const ss = SpreadsheetApp.openById(SS_ID);
-  const sheet = ss.getSheetByName('q&a');
-  const faq = JSON.parse(data);
-
-  const rows = faq.map((f, i) => [
-    f.id,
-    f.questionEn,
-    f.questionAr,
-    f.answerEn,
-    f.answerAr,
-    f.active,
-    i + 1 // Order
-  ]);
-
-  // Clear existing data (keep header)
-  const lastRow = Math.max(2, sheet.getLastRow());
-  if (lastRow >= 2) {
-    sheet.getRange(2, 1, lastRow - 1, 7).clearContent();
-  }
-
-  if (rows.length > 0) {
-    sheet.getRange(2, 1, rows.length, 7).setValues(rows);
-  }
-
-  return jsonResponse({ status: 'success' });
-}
-
-
-// ═══════════════════════════════════════════════════════════════════
-//  ORDER RECORDING
-// ═══════════════════════════════════════════════════════════════════
-function recordOrder(params) {
-  try {
-    const ss    = SpreadsheetApp.openById(SS_ID);
-    const sheet = ss.getSheetByName('Orders');
-    if (!sheet) throw new Error('Orders sheet not found');
-    const timestamp = new Date();
-
-    sheet.appendRow([
-      timestamp,
-      params.name          || '',
-      params.phone         || '',
-      params.address       || '',
-      params.landmark      || '',
-      params.notes         || '',
-      params.orderDetails  || '',
-      params.bundleDetails || '',
-      params.totalAmount   || ''
-    ]);
-
-    try {
-      sendOrderNotification(params, timestamp);
-    } catch (mailErr) {
-      console.error('Email failed: ' + mailErr.toString());
-    }
-
-    return jsonResponse({ status: 'success', message: 'Order recorded ✅' });
-  } catch (err) {
-    return jsonResponse({ status: 'error', message: err.toString() });
-  }
-}
-
-function sendOrderNotification(params, timestamp) {
-  const name    = params.name          || '—';
-  const phone   = params.phone         || '—';
-  const address = params.address       || '—';
-  const landmark = params.landmark     || '—';
-  const notes   = params.notes         || '—';
-  const items   = params.orderDetails  || '—';
-  const bundle  = params.bundleDetails || '';
-  const total   = params.totalAmount   || '—';
-  const time    = Utilities.formatDate(timestamp, Session.getScriptTimeZone(), 'dd/MM/yyyy HH:mm:ss');
-
-  const subject = '🛒 New Order — ' + name + ' | ' + total;
-  const htmlBody = `
-    <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;border:1px solid #e0e0e0;border-radius:12px;overflow:hidden;">
-      <div style="background:#4A6741;padding:20px 28px;">
-        <h2 style="color:#fff;margin:0;font-size:1.3rem;">🌿 New Orgánica Order</h2>
-        <p style="color:rgba(255,255,255,0.75);margin:4px 0 0;font-size:.85rem;">${time}</p>
-      </div>
-      <div style="padding:24px 28px;background:#fff;">
-        <table style="width:100%;border-collapse:collapse;margin-bottom:20px;">
-          <tr style="background:#f4f6f3;"><td style="padding:10px 14px;font-weight:bold;color:#4A6741;width:140px;">👤 Name</td><td style="padding:10px 14px;">${name}</td></tr>
-          <tr><td style="padding:10px 14px;font-weight:bold;color:#4A6741;">📞 Phone</td><td style="padding:10px 14px;">${phone}</td></tr>
-          <tr style="background:#f4f6f3;"><td style="padding:10px 14px;font-weight:bold;color:#4A6741;">📍 Address</td><td style="padding:10px 14px;">${address}</td></tr>
-          <tr><td style="padding:10px 14px;font-weight:bold;color:#4A6741;">🏙️ Landmark</td><td style="padding:10px 14px;">${landmark}</td></tr>
-          <tr style="background:#f4f6f3;"><td style="padding:10px 14px;font-weight:bold;color:#4A6741;">📝 Notes</td><td style="padding:10px 14px;">${notes}</td></tr>
-        </table>
-        <div style="background:#fff8f0;border-left:4px solid #D47A2C;padding:14px 18px;border-radius:0 8px 8px 0;margin-bottom:16px;">
-          <p style="margin:0 0 6px;font-weight:bold;color:#D47A2C;">🛒 Order Items</p>
-          <p style="margin:0;color:#333;line-height:1.6;">${items.replace(/,\s*/g, '<br>')}</p>
-          ${bundle ? '<p style="margin:8px 0 0;color:#666;">Bundle: ' + bundle + '</p>' : ''}
+    <!-- Header -->
+    <header>
+        <h1>🌿 Orgánica <span style="font-weight:300; opacity:0.8;">Admin</span></h1>
+        <div class="config-bar">
+            <input type="text" id="apiUrl" placeholder="Paste Web App URL here..." />
+            <button onclick="saveConfig()">Connect</button>
         </div>
-        <div style="background:#4A6741;color:#fff;padding:14px 18px;border-radius:8px;text-align:center;">
-          <span style="font-size:1.1rem;font-weight:bold;">💰 Total: ${total}</span>
-          <span style="font-size:.8rem;opacity:.8;display:block;margin-top:4px;">Estimated — final based on actual weight</span>
-        </div>
-        <p style="margin-top:20px;font-size:.8rem;color:#999;text-align:center;">View all orders in the <a href="https://docs.google.com/spreadsheets/d/${SS_ID}" style="color:#4A6741;">Google Sheet</a></p>
-      </div>
-    </div>`;
-  const plainBody = 'New Orgánica Order — ' + time + '\n\nName: ' + name + '\nPhone: ' + phone + '\nAddress: ' + address + '\nLandmark: ' + landmark + '\nNotes: ' + notes + '\n\nItems: ' + items + (bundle ? '\nBundle: ' + bundle : '') + '\nTotal: ' + total;
+    </header>
 
-  MailApp.sendEmail({ to: NOTIFICATION_EMAILS.join(','), subject: subject, body: plainBody, htmlBody: htmlBody });
-}
+    <!-- Navigation -->
+    <nav>
+        <button class="tab-btn active" onclick="switchTab('products')">📦 Products</button>
+        <button class="tab-btn" onclick="switchTab('bundles')">🎁 Ramadan Bundles</button>
+        <button class="tab-btn" onclick="switchTab('faq')">❓ FAQ</button>
+    </nav>
 
+    <!-- Main Content -->
+    <main>
+        
+        <!-- Products Section -->
+        <section id="products" class="section active">
+            <div class="toolbar">
+                <h2>Product Pricelist</h2>
+                <div>
+                    <button class="btn btn-secondary" onclick="addProduct()">+ Add Product</button>
+                    <button class="btn btn-primary" onclick="saveProducts()">💾 Save Changes</button>
+                </div>
+            </div>
+            <div class="table-container">
+                <table id="productsTable">
+                    <thead>
+                        <tr>
+                            <th class="col-id">ID</th>
+                            <th>Section</th>
+                            <th>Name (EN)</th>
+                            <th>Name (AR)</th>
+                            <th>Type</th>
+                            <th>Price / Fixed</th>
+                            <th>Unit</th>
+                            <th class="col-check">Active</th>
+                            <th class="col-actions"></th>
+                        </tr>
+                    </thead>
+                    <tbody><!-- Dynamic --></tbody>
+                </table>
+            </div>
+        </section>
 
-// ═══════════════════════════════════════════════════════════════════
-//  SETUP SHEETS
-// ═══════════════════════════════════════════════════════════════════
-function setupSheets() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const GREEN = '#4A6741', WHITE = '#ffffff', LIGHT = '#d9ead3';
+        <!-- Bundles Section -->
+        <section id="bundles" class="section">
+            <div class="toolbar">
+                <h2>Ramadan Bundles</h2>
+                <div>
+                    <button class="btn btn-secondary" onclick="addBundle()">+ Add Bundle</button>
+                    <button class="btn btn-primary" onclick="saveBundles()">💾 Save Changes</button>
+                </div>
+            </div>
+            <div class="table-container">
+                <table id="bundlesTable">
+                    <thead>
+                        <tr>
+                            <th class="col-id">ID</th>
+                            <th>Name (EN/AR)</th>
+                            <th>Badge (EN/AR)</th>
+                            <th>Price</th>
+                            <th>Contents (EN)</th>
+                            <th>Description (EN)</th>
+                            <th class="col-check">Active</th>
+                            <th class="col-actions"></th>
+                        </tr>
+                    </thead>
+                    <tbody><!-- Dynamic --></tbody>
+                </table>
+            </div>
+        </section>
 
-  // ── Orders ──────────────────────────────────────────────────────
-  let orders = ss.getSheetByName('Orders') || ss.insertSheet('Orders');
-  orders.clearContents();
-  const oHeaders = [['Timestamp','Name','Phone','Address','Landmark','Notes','Order Details','Bundle Details','Total Amount']];
-  orders.getRange(1,1,1,9).setValues(oHeaders).setFontWeight('bold').setBackground(GREEN).setFontColor(WHITE);
-  orders.setFrozenRows(1);
-  orders.setColumnWidth(1, 160);
-  orders.setColumnWidth(7, 300);
-  orders.setColumnWidth(8, 200);
+        <!-- FAQ Section -->
+        <section id="faq" class="section">
+            <div class="toolbar">
+                <h2>Frequently Asked Questions</h2>
+                <div>
+                    <button class="btn btn-secondary" onclick="addFaq()">+ Add Question</button>
+                    <button class="btn btn-primary" onclick="saveFaq()">💾 Save Changes</button>
+                </div>
+            </div>
+            <div class="table-container">
+                <table id="faqTable">
+                    <thead>
+                        <tr>
+                            <th class="col-id">ID</th>
+                            <th>Question (EN)</th>
+                            <th>Question (AR)</th>
+                            <th>Answer (EN)</th>
+                            <th>Answer (AR)</th>
+                            <th class="col-check">Active</th>
+                            <th class="col-actions"></th>
+                        </tr>
+                    </thead>
+                    <tbody><!-- Dynamic --></tbody>
+                </table>
+            </div>
+        </section>
 
-  // ── pricelist ───────────────────────────────────────────────────
-  let pl = ss.getSheetByName('pricelist') || ss.insertSheet('pricelist');
-  pl.clearContents();
+    </main>
 
-  pl.getRange('A1').setValue('===SECTIONS===').setBackground(GREEN).setFontColor(WHITE).setFontWeight('bold');
-  pl.getRange(2,1,1,4).setValues([['ID','Label EN','Label AR','Display Order']]).setFontWeight('bold').setBackground(LIGHT);
-  pl.getRange(3,1,4,4).setValues([
-    ['whole_poultry','🐔 Whole Poultry','🐔 دواجن كاملة',1],
-    ['cuts','🍗 Cuts','🍗 قطعيات',2],
-    ['processed','⚡ Processed','⚡ مصنعات',3],
-    ['offal','🫀 Offal','🫀 كبدة',4]
-  ]);
-  pl.getRange('A7').setValue('');  // spacer
-  pl.getRange('A8').setValue('===PRODUCTS===').setBackground(GREEN).setFontColor(WHITE).setFontWeight('bold');
-  pl.getRange(9,1,1,13).setValues([['ID','Section','Name EN','Name AR','Type (variable_weight / fixed)','Price/kg (EGP)','Fixed Price (EGP)','Unit EN','Unit AR','Default Weight(g)','Min Weight(g)','Max Weight(g)','Active (TRUE/FALSE)']]).setFontWeight('bold').setBackground(LIGHT);
+    <!-- Feedback Elements -->
+    <div id="toast">Message here</div>
+    <div class="loader-overlay" id="loader"><div class="spinner"></div></div>
 
-  const products = [
-    ['baladi_chicken','whole_poultry','Baladi Chicken','دجاج بلدي','variable_weight',190,'','','',1200,800,2500,true],
-    ['white_chicken','whole_poultry','White Chicken','دجاج أبيض','variable_weight',140,'','','',1200,800,2500,true],
-    ['duck','whole_poultry','Duck','بط','variable_weight',210,'','','',1500,800,2500,true],
-    ['pigeons','whole_poultry','Pigeons','حمام','fixed','',275,'pair','زوج','','','',true],
-    ['rabbit','whole_poultry','Rabbit','أرنب','variable_weight',230,'','','',1200,800,2500,true],
-    ['drumsticks','cuts','Drumsticks (bone-in)','دبوس بالعظم','fixed','',180,'kg','كجم','','','',true],
-    ['thighs_bone','cuts','Thighs (bone-in)','أوراك بالعظم','fixed','',160,'kg','كجم','','','',true],
-    ['thighs_boneless','cuts','Thighs (boneless)','أوراك مخلية','fixed','',260,'kg','كجم','','','',true],
-    ['wings','cuts','Wings','أجنحة','fixed','',80,'kg','كجم','','','',true],
-    ['pane','processed','Pané Fillets','بانية','fixed','',275,'kg','كجم','','','',true],
-    ['shish_tawook','processed','Shish Tawook','شيش طاووق','fixed','',275,'kg','كجم','','','',true],
-    ['breasts','processed','Chicken Breasts','صدور','fixed','',275,'kg','كجم','','','',true],
-    ['minced','processed','Minced','مفروم','fixed','',275,'kg','كجم','','','',true],
-    ['shawarma','processed','Shawarma','شاورما','fixed','',275,'kg','كجم','','','',true],
-    ['liver','offal','Pure Liver','كبدة صافي','fixed','',190,'kg','كجم','','','',true],
-  ];
-  pl.getRange(10,1,products.length,13).setValues(products);
-  pl.setFrozenRows(0);
-  for (let c = 1; c <= 13; c++) pl.autoResizeColumn(c);
+    <script>
+        // --- State Management ---
+        const state = {
+            products: [],
+            bundles: [],
+            faq: [],
+            apiUrl: localStorage.getItem('organica_api_url') || ''
+        };
 
-  // ── boundles ────────────────────────────────────────────────────
-  let bd = ss.getSheetByName('boundles') || ss.insertSheet('boundles');
-  bd.clearContents();
-  bd.getRange(1,1,1,17).setValues([['ID','Name EN','Name AR','Badge EN','Badge AR','Badge Emoji','Bundle Price','Original Price','Save EN','Save AR','Persons EN','Persons AR','Contents EN\n(one item per line)','Contents AR\n(one item per line)','Desc EN','Desc AR','Active']]).setFontWeight('bold').setBackground(GREEN).setFontColor(WHITE).setWrap(true);
-  bd.setFrozenRows(1);
-  bd.setRowHeight(1, 50);
-  bd.getRange(2,1,3,17).setValues([
-    ['small','Small Family Bundle (4 Pers.)','باقة العيلة الصغيرة (٤ أفراد)','Small Family','العيلة الصغيرة','🌿',395,'445','Save 50 EGP · ~11%','وفّر ٥٠ ج · ١١٪','👨‍👩‍👧‍👦 Ideal for a cozy 4-person Iftar','👨‍👩‍👧‍👦 مثالي لإفطار عيلة ٤ أفراد','1 Baladi Chicken (whole) — 190 EGP @ 1.5 kg\n1 kg Chicken Thighs (bone-in) — 160 EGP','١ دجاجة بلدي كاملة — ٢٨٥ ج @ ١.٥ كجم\n١ كجم أوراك بالعظم — ١٦٠ ج','1 Baladi Chicken (~1.5kg) + 1kg Thighs (bone-in)','دجاجة بلدي (~١.٥ كيلو) + كيلو أوراك بالعظم',true],
-    ['gathering','The Gathering Bundle (6 Pers.)','باقة التجمّع (٦ أفراد)','The Gathering','التجمّع','✨',1090,'1,190','Save 100 EGP · ~8%','وفّر ١٠٠ ج · ٨٪','👨‍👩‍👧‍👦👶 The classic Ramadan spread for 6 persons','👨‍👩‍👧‍👦👶 مائدة رمضان الكلاسيكية لـ ٦ أفراد','1 Whole Duck (~3 kg @ 210/kg) — 630 EGP\n1 kg All Pané Cuts — 275 EGP\n1 Baladi Chicken (whole) — 190 EGP @ 1.5 kg','١ بطة كاملة (~٣ كجم) — ٦٣٠ ج\n١ كجم قطعيات بانيه — ٢٧٥ ج\n١ دجاجة بلدي كاملة — ٢٨٥ ج @ ١.٥ كجم','1 Whole Duck (~3kg) + 1kg Pané Cuts + 1 Baladi Chicken','بطة كاملة (~٣ كيلو) + كيلو قطعيات بانيه + دجاجة بلدي',true],
-    ['feast','Big Feast Bundle (8 Pers.)','باقة الوليمة الكبيرة (٨ أفراد)','Big Feast','الوليمة الكبيرة','👑',1565,'1,740','Save 175 EGP · ~10%','وفّر ١٧٥ ج · ١٠٪','🎉 The ultimate First-Day-of-Ramadan luxury — 8 persons','🎉 الرفاهية المطلقة ليوم رمضان الأول — ٨ أفراد','1 Whole Duck (~3 kg @ 210/kg) — 630 EGP\n2 Pairs of Pigeons (2 × 275) — 550 EGP\n1 Baladi Chicken (whole) — 190 EGP @ 1.5 kg\n1 kg All Pané Cuts — 275 EGP','١ بطة كاملة (~٣ كجم) — ٦٣٠ ج\n٢ جوز حمام (٢ × ٢٧٥) — ٥٥٠ ج\n١ دجاجة بلدي كاملة — ٢٨٥ ج @ ١.٥ كجم\n١ كجم قطعيات بانيه — ٢٧٥ ج','1 Whole Duck (~3kg) + 2 Pairs Pigeons + 1 Baladi Chicken + 1kg Pané Cuts','بطة كاملة (~٣ كيلو) + جوزين حمام + دجاجة بلدي + كيلو قطعيات بانيه',true],
-  ]);
-  bd.setRowHeights(2, 3, 100);
-  for (let c = 1; c <= 17; c++) bd.setColumnWidth(c, 140);
-  bd.setColumnWidth(13, 280); bd.setColumnWidth(14, 280);
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            if (state.apiUrl) {
+                document.getElementById('apiUrl').value = state.apiUrl;
+                loadData();
+            } else {
+                showToast('Please enter your Web App URL above.', 'error');
+            }
+        });
 
-  // ── q&a ─────────────────────────────────────────────────────────
-  let qa = ss.getSheetByName('q&a') || ss.insertSheet('q&a');
-  qa.clearContents();
-  qa.getRange(1,1,1,7).setValues([['ID','Question EN','Question AR','Answer EN','Answer AR','Active','Display Order']]).setFontWeight('bold').setBackground(GREEN).setFontColor(WHITE);
-  qa.setFrozenRows(1);
-  qa.getRange(2,1,5,7).setValues([
-    ['faq_1','What makes Orgánica\'s poultry "organic"?','إيه اللي بيخلي دواجن Orgánica "عضوية"؟','At Orgánica, our poultry is raised according to three essential principles: Natural Diet, Healthy Environment, Responsible Care.','في Orgánica، بنربي دواجننا على ثلاث أسس رئيسية: تغذية طبيعية، بيئة صحية، رعاية مسؤولة.',true,1],
-    ['faq_2','What products does Orgánica offer?','إيه المنتجات اللي Orgánica بتقدمها؟','We offer a full range of premium organic poultry: Whole Poultry, Cuts, Processed, Offal.','بنقدم تشكيلة كاملة من الدواجن العضوية الفاخرة: دواجن كاملة، قطعيات، مصنعات، كبدة صافي.',true,2],
-    ['faq_3','How do I place an order?','إزاي أطلب؟','All orders are placed exclusively through the order form on this page.','جميع الطلبات تتم حصرياً من خلال نموذج الطلب في هذه الصفحة.',true,3],
-    ['faq_4','How does Orgánica ensure the well-being of its birds?','إزاي Orgánica بتضمن صحة الطيور وراحتها؟','We prioritize animal welfare through a "Bio-Vitality Environment".','بنولي اهتمام كبير لرفاهية الحيوانات من خلال "بيئة حيوية".',true,4],
-    ['faq_5','What is "Al-\'Aleqa"?','إيه هي "العليقة"؟','A custom feed mix the farm owner prepares personally — fresh vegetables, beets, carrots, and corn.','خلطة أعلاف خاصة يُعدّها صاحب المزرعة بنفسه — خضروات طازجة، بنجر، جزر، وذرة.',true,5],
-  ]);
-  for (let c = 1; c <= 7; c++) qa.autoResizeColumn(c);
-  qa.setColumnWidth(4, 350); qa.setColumnWidth(5, 350);
+        function saveConfig() {
+            const url = document.getElementById('apiUrl').value.trim();
+            if (!url) return showToast('URL cannot be empty', 'error');
+            localStorage.setItem('organica_api_url', url);
+            state.apiUrl = url;
+            showToast('Configuration saved. Loading data...', 'success');
+            loadData();
+        }
 
-  SpreadsheetApp.getUi().alert('✅ Setup complete!\n\nNext step: Deploy as Web App (Extensions → Apps Script → Deploy).');
-}
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
 
-function jsonResponse(data) {
-  return ContentService.createTextOutput(JSON.stringify(data)).setMimeType(ContentService.MimeType.JSON);
-}
+        // --- Data Loading ---
+        function showLoader(show) { document.getElementById('loader').classList.toggle('active', show); }
+
+        async function loadData() {
+            showLoader(true);
+            try {
+                const res = await fetch(`${state.apiUrl}?action=getConfig`);
+                if (!res.ok) throw new Error('Network response was not ok');
+                const data = await res.json();
+                
+                if (data.error) throw new Error(data.error);
+
+                state.products = data.products || [];
+                state.bundles = data.ramadanBundles || [];
+                state.faq = data.faqItems || [];
+
+                renderProducts();
+                renderBundles();
+                renderFaq();
+                showToast('Data loaded successfully', 'success');
+
+            } catch (err) {
+                console.error(err);
+                showToast('Failed to load data: ' + err.message, 'error');
+            } finally {
+                showLoader(false);
+            }
+        }
+
+        // --- Rendering ---
+        
+        // 1. Products
+        function renderProducts() {
+            const tbody = document.querySelector('#productsTable tbody');
+            tbody.innerHTML = '';
+            state.products.forEach((p, index) => {
+                const tr = document.createElement('tr');
+                const isVariable = p.pricingType === 'variable_weight';
+                
+                tr.innerHTML = `
+                    <td><input type="text" value="${p.id}" onchange="updateProduct(${index}, 'id', this.value)"></td>
+                    <td><input type="text" value="${p.section}" onchange="updateProduct(${index}, 'section', this.value)"></td>
+                    <td><input type="text" value="${p.nameEn}" onchange="updateProduct(${index}, 'nameEn', this.value)"></td>
+                    <td><input type="text" value="${p.nameAr}" onchange="updateProduct(${index}, 'nameAr', this.value)"></td>
+                    <td>
+                        <select onchange="updateProduct(${index}, 'pricingType', this.value)">
+                            <option value="fixed" ${p.pricingType === 'fixed' ? 'selected' : ''}>Fixed</option>
+                            <option value="variable_weight" ${p.pricingType === 'variable_weight' ? 'selected' : ''}>Variable Weight</option>
+                        </select>
+                    </td>
+                    <td>
+                        <input type="number" value="${isVariable ? p.pricePerKg : p.fixedPrice}" 
+                            onchange="updateProduct(${index}, '${isVariable ? 'pricePerKg' : 'fixedPrice'}', this.value)">
+                    </td>
+                    <td>
+                        <input type="text" value="${isVariable ? '' : p.fixedUnit}" placeholder="${isVariable ? 'kg' : ''}" ${isVariable ? 'disabled' : ''} 
+                            onchange="updateProduct(${index}, 'fixedUnit', this.value)">
+                    </td>
+                    <td class="col-check"><input type="checkbox" ${p.active ? 'checked' : ''} onchange="updateProduct(${index}, 'active', this.checked)"></td>
+                    <td class="col-actions"><button class="icon-btn delete" onclick="deleteItem('products', ${index})">🗑️</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function updateProduct(index, field, value) {
+            if (field === 'active') value = Boolean(value);
+            if (field === 'pricePerKg' || field === 'fixedPrice') value = parseFloat(value);
+            state.products[index][field] = value;
+            // Re-render only if type changed to swap inputs
+            if (field === 'pricingType') renderProducts();
+        }
+
+        function addProduct() {
+            state.products.push({
+                id: 'new_product', section: 'whole_poultry', nameEn: 'New Product', nameAr: 'منتج جديد',
+                pricingType: 'fixed', fixedPrice: 0, fixedUnit: 'kg', active: true
+            });
+            renderProducts();
+        }
+
+        async function saveProducts() {
+            showLoader(true);
+            try {
+                const res = await fetch(state.apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ action: 'saveProducts', data: JSON.stringify(state.products) })
+                });
+                const result = await res.json();
+                if (result.status === 'success') showToast('Products saved successfully', 'success');
+                else throw new Error(result.message || 'Unknown error');
+            } catch (err) {
+                showToast('Save failed: ' + err.message, 'error');
+            } finally {
+                showLoader(false);
+            }
+        }
+
+        // 2. Bundles
+        function renderBundles() {
+            const tbody = document.querySelector('#bundlesTable tbody');
+            tbody.innerHTML = '';
+            state.bundles.forEach((b, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><input type="text" value="${b.id}" onchange="updateBundle(${index}, 'id', this.value)"></td>
+                    <td>
+                        <input type="text" placeholder="EN" value="${b.nameEn}" style="margin-bottom:4px" onchange="updateBundle(${index}, 'nameEn', this.value)">
+                        <input type="text" placeholder="AR" value="${b.nameAr}" onchange="updateBundle(${index}, 'nameAr', this.value)">
+                    </td>
+                    <td>
+                        <input type="text" placeholder="Badge EN" value="${b.badgeEn}" style="margin-bottom:4px" onchange="updateBundle(${index}, 'badgeEn', this.value)">
+                        <input type="text" placeholder="Badge AR" value="${b.badgeAr}" onchange="updateBundle(${index}, 'badgeAr', this.value)">
+                    </td>
+                    <td><input type="number" value="${b.bundlePrice}" onchange="updateBundle(${index}, 'bundlePrice', this.value)"></td>
+                    <td><textarea placeholder="One item per line" onchange="updateBundle(${index}, 'contentsEn', this.value.split('\\n'))">${b.contentsEn.join('\n')}</textarea></td>
+                    <td><textarea onchange="updateBundle(${index}, 'descEn', this.value)">${b.descEn}</textarea></td>
+                    <td class="col-check"><input type="checkbox" ${b.active ? 'checked' : ''} onchange="updateBundle(${index}, 'active', this.checked)"></td>
+                    <td class="col-actions"><button class="icon-btn delete" onclick="deleteItem('bundles', ${index})">🗑️</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function updateBundle(index, field, value) {
+            if (field === 'active') value = Boolean(value);
+            if (field === 'bundlePrice') value = parseFloat(value);
+            state.bundles[index][field] = value;
+        }
+
+        function addBundle() {
+            state.bundles.push({
+                id: 'new_bundle', nameEn: 'New Bundle', nameAr: 'باقة جديدة', bundlePrice: 0,
+                contentsEn: [], descEn: '', active: true
+            });
+            renderBundles();
+        }
+
+        async function saveBundles() {
+            showLoader(true);
+            try {
+                const res = await fetch(state.apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ action: 'saveBundles', data: JSON.stringify(state.bundles) })
+                });
+                const result = await res.json();
+                if (result.status === 'success') showToast('Bundles saved successfully', 'success');
+                else throw new Error(result.message || 'Unknown error');
+            } catch (err) {
+                showToast('Save failed: ' + err.message, 'error');
+            } finally {
+                showLoader(false);
+            }
+        }
+
+        // 3. FAQ
+        function renderFaq() {
+            const tbody = document.querySelector('#faqTable tbody');
+            tbody.innerHTML = '';
+            state.faq.forEach((f, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><input type="text" value="${f.id}" onchange="updateFaq(${index}, 'id', this.value)"></td>
+                    <td><input type="text" value="${f.questionEn}" onchange="updateFaq(${index}, 'questionEn', this.value)"></td>
+                    <td><input type="text" value="${f.questionAr}" onchange="updateFaq(${index}, 'questionAr', this.value)"></td>
+                    <td><textarea onchange="updateFaq(${index}, 'answerEn', this.value)">${f.answerEn}</textarea></td>
+                    <td><textarea onchange="updateFaq(${index}, 'answerAr', this.value)">${f.answerAr}</textarea></td>
+                    <td class="col-check"><input type="checkbox" ${f.active ? 'checked' : ''} onchange="updateFaq(${index}, 'active', this.checked)"></td>
+                    <td class="col-actions"><button class="icon-btn delete" onclick="deleteItem('faq', ${index})">🗑️</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function updateFaq(index, field, value) {
+            if (field === 'active') value = Boolean(value);
+            state.faq[index][field] = value;
+        }
+
+        function addFaq() {
+            state.faq.push({
+                id: 'new_faq', questionEn: 'New Question', questionAr: 'سؤال جديد',
+                answerEn: 'Answer goes here', answerAr: 'الإجابة هنا', active: true
+            });
+            renderFaq();
+        }
+
+        async function saveFaq() {
+            showLoader(true);
+            try {
+                const res = await fetch(state.apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ action: 'saveFaq', data: JSON.stringify(state.faq) })
+                });
+                const result = await res.json();
+                if (result.status === 'success') showToast('FAQ saved successfully', 'success');
+                else throw new Error(result.message || 'Unknown error');
+            } catch (err) {
+                showToast('Save failed: ' + err.message, 'error');
+            } finally {
+                showLoader(false);
+            }
+        }
+
+        // --- Shared ---
+        function deleteItem(type, index) {
+            if (confirm('Are you sure you want to delete this item?')) {
+                state[type].splice(index, 1);
+                if (type === 'products') renderProducts();
+                if (type === 'bundles') renderBundles();
+                if (type === 'faq') renderFaq();
+            }
+        }
+
+        function showToast(msg, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.className = type === 'success' ? 'success show' : 'error show';
+            setTimeout(() => { toast.classList.remove('show'); }, 3000);
+        }
+    </script>
+</body>
+</html>
