@@ -92,8 +92,8 @@
     <header>
         <h1>🌿 Orgánica <span style="font-weight:300; opacity:0.8;">Admin</span></h1>
         <div class="config-bar">
-            <input type="text" id="apiUrl" placeholder="Paste Web App URL here..." />
-            <button onclick="saveConfig()">Connect</button>
+            <input type="text" id="apiUrl" placeholder="Web App URL is configured..." disabled />
+            <button onclick="window.location.reload()">Refresh Data</button>
         </div>
     </header>
 
@@ -197,7 +197,7 @@
     <div id="toast">Message here</div>
     <div class="loader-overlay" id="loader"><div class="spinner"></div></div>
 
-  <script>
+    <script>
     // ──────────────────────────────────────────────────────────────
     // CONFIGURATION
     // ──────────────────────────────────────────────────────────────
@@ -217,10 +217,6 @@
     // ──────────────────────────────────────────────────────────────
     document.addEventListener('DOMContentLoaded', async () => {
       await loadAdminData();
-      
-      // Allow changing URL dynamically if needed via the header input
-      const urlInput = document.getElementById('apiUrl');
-      if(urlInput && !urlInput.value) urlInput.value = SCRIPT_URL;
     });
 
     // ──────────────────────────────────────────────────────────────
@@ -259,7 +255,7 @@
         
         const result = await response.json();
         if (result.result === "success") {
-          showToast("Saved successfully!", "success");
+          showToast("Saved successfully! Live site updated.", "success");
         } else {
           throw new Error(result.message || result.error || "Unknown Error");
         }
@@ -275,13 +271,6 @@
     function saveProducts() { saveData(); }
     function saveBundles() { saveData(); }
     function saveFaq() { saveData(); }
-    function saveConfig() { 
-      const url = document.getElementById('apiUrl').value;
-      if(url) {
-          // In a real app, you might save this to localStorage
-          window.location.href = url; // Just for testing connection
-      }
-    }
 
     // ──────────────────────────────────────────────────────────────
     // TABS
@@ -290,8 +279,6 @@
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
       
-      // Find button by onclick text content is tricky, simpler to rely on order or specific ID logic
-      // But based on your HTML, we just toggle classes
       const btns = document.querySelectorAll('.tab-btn');
       if(tabId === 'products') btns[0].classList.add('active');
       if(tabId === 'bundles') btns[1].classList.add('active');
