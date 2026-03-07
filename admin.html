@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+    <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -456,6 +456,57 @@
             toast.className = type === 'success' ? 'success show' : 'error show';
             setTimeout(() => { toast.classList.remove('show'); }, 3000);
         }
+
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz-QZvruLMplWfwJMgCWqgVkqbLA6tZm_mxalTmGAe8OxX-U-x_BJFU_0BTTsfWf40rEg/exec";
+let currentConfig = {};
+
+// 1. Load current data into the admin form
+async function loadAdminData() {
+  const response = await fetch(SCRIPT_URL);
+  currentConfig = await response.json();
+  
+  // Logic to populate your HTML inputs with currentConfig values
+  // Example: document.getElementById('siteName').value = currentConfig.meta.siteName;
+}
+
+// 2. Save Data function
+async function saveData() {
+  // Gather all data from your HTML inputs back into a JSON object
+  // This is a simplified example:
+  const updatedConfig = {
+    meta: {
+        siteName: document.getElementById('siteName').value,
+        // ... map all other fields
+    },
+    products: currentConfig.products, // Assuming you have logic to edit this array too
+    sections: currentConfig.sections,
+    // ... include the rest of the structure
+  };
+
+  // Send to Google Script via POST
+  try {
+    const response = await fetch(SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify(updatedConfig)
+    });
+    
+    const result = await response.json();
+    if(result.result === "success") {
+      alert("Saved successfully! The live site is updated.");
+    } else {
+      alert("Error: " + result.error);
+    }
+  } catch (error) {
+    console.error("Error saving:", error);
+  }
+}
+
+// Load data on start
+loadAdminData();
+
+// Bind save button
+document.getElementById('saveButton').addEventListener('click', saveData);
     </script>
 </body>
 </html>
+
